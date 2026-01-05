@@ -12,6 +12,8 @@ class HttpxAdapter(BaseHTTPAdapter):
     
     def __init__(self):
         super().__init__("httpx")
+        self.client = httpx.Client()
+        self.async_client = httpx.AsyncClient()
     
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the httpx library."""
@@ -27,14 +29,13 @@ class HttpxAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
             
             # Make the request
-            with httpx.Client(verify=verify_ssl) as client:
-                response = client.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    content=data,
-                    timeout=timeout
-                )
+            response = self.client.request(
+                method=method,
+                url=url,
+                headers=headers,
+                content=data,
+                timeout=timeout
+            )
             
             # Return response data
             return {
@@ -71,16 +72,15 @@ class HttpxAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
             
             # Make the async request
-            async with httpx.AsyncClient(verify=verify_ssl) as client:
-                start_time = asyncio.get_event_loop().time()
-                response = await client.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    content=data,
-                    timeout=timeout
-                )
-                end_time = asyncio.get_event_loop().time()
+            start_time = asyncio.get_event_loop().time()
+            response = await self.async_client.request(
+                method=method,
+                url=url,
+                headers=headers,
+                content=data,
+                timeout=timeout
+            )
+            end_time = asyncio.get_event_loop().time()
             
             # Return response data
             return {

@@ -13,6 +13,8 @@ class Urllib3Adapter(BaseHTTPAdapter):
         super().__init__("urllib3")
         # Disable SSL warnings if not verifying SSL
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        self.pool = urllib3.PoolManager()
+        self.pool_no_verify = urllib3.PoolManager(cert_reqs='CERT_NONE', assert_hostname=False)
     
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the urllib3 library."""
@@ -24,11 +26,8 @@ class Urllib3Adapter(BaseHTTPAdapter):
             timeout = request.timeout
             verify_ssl = request.verify_ssl
             
-            # Create a pool manager
-            if verify_ssl:
-                http = urllib3.PoolManager()
-            else:
-                http = urllib3.PoolManager(cert_reqs='CERT_NONE', assert_hostname=False)
+            # Select the appropriate pool manager
+            http = self.pool if verify_ssl else self.pool_no_verify
             
             # Prepare data based on method
             body = request.body if request.body else None

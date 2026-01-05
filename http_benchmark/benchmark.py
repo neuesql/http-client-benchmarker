@@ -124,19 +124,29 @@ class BenchmarkRunner:
             # Continue making requests for the specified duration
             while time.time() < end_time:
                 completed_futures = []
-                for future in as_completed(futures, timeout=1):  # Use timeout to check duration periodically
-                    result = future.result()
-                    if result['success']:
-                        response_times.append(result['response_time'])
-                    else:
-                        error_count += 1
+                try:
+                    for future in as_completed(futures, timeout=1):  # Use timeout to check duration periodically
+                        result = future.result()
+                        if result['success']:
+                            response_times.append(result['response_time'])
+                        else:
+                            error_count += 1
+                            if error_count <= 5: # Limit error logging
+                                app_logger.error(f"Request failed: {result.get('error', 'Unknown error')}")
 
-                    # Submit a new request to keep the concurrency level
-                    if time.time() < end_time:
-                        futures.add(executor.submit(adapter.make_request, http_request))
+                        # Submit a new request to keep the concurrency level
+                        if time.time() < end_time:
+                            futures.add(executor.submit(adapter.make_request, http_request))
 
-                    completed_futures.append(future)
-
+                        completed_futures.append(future)
+                except TimeoutError:
+                    # Timeout reached, loop will continue and check time
+                    pass
+                except Exception as e:
+                    # Handle other potential errors during execution
+                    # app_logger.error(f"Error in future processing: {str(e)}")
+                    pass
+                
                 # Remove completed futures
                 for future in completed_futures:
                     futures.discard(future)
@@ -237,6 +247,8 @@ class BenchmarkRunner:
                         response_times.append(result['response_time'])
                     else:
                         error_count += 1
+                        if error_count <= 5: # Limit error logging
+                             app_logger.error(f"Request failed: {result.get('error', 'Unknown error')}")
                 except Exception:
                     error_count += 1
 

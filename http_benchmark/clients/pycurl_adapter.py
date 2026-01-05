@@ -153,8 +153,6 @@ class PycurlAdapter(BaseHTTPAdapter):
         Note: pycurl is synchronous, so this just calls the sync version.
         For true async support, use the httpx or aiohttp adapters.
         """
-        import asyncio
-        await asyncio.sleep(0.01)  # Simulate async operation
         return self.make_request(request)
     
     def get_supported_methods(self) -> list:

@@ -48,7 +48,7 @@ python -m http_benchmark.cli.main --url https://httpbin.org/get --client httpx -
 python -m http_benchmark.cli.main --url http://localhost/get --client httpx --concurrency 10 --duration 30
 
 # Compare multiple clients
-python -m http_benchmark.cli.main --url http://localhost/get --compare requests aiohttp pycurl urllib3 --concurrency 5 --duration 20
+python -m http_benchmark.cli.main --url http://localhost/get --compare requests aiohttp pycurl urllib3 httpx --concurrency 1 --duration 2
 
 # Advanced benchmark with custom parameters
 python -m http_benchmark.cli.main --url http://localhost/data --client httpx --method POST --concurrency 20 --duration 60 --headers '{"Content-Type": "application/json"}'
