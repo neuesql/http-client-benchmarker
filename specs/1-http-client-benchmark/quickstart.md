@@ -50,23 +50,8 @@ print(f"Average response time: {result.avg_response_time}ms")
 print(f"Requests per second: {result.requests_per_second}")
 ```
 
-### 2. Using Decorators
-Apply benchmarking to existing code with decorators:
 
-```python
-from http_benchmark.decorators import benchmark
-
-@benchmark(client_library="httpx", concurrency=5)
-def my_http_call():
-    import httpx
-    response = httpx.get("https://httpbin.org/get")
-    return response.json()
-
-result = my_http_call()
-print(f"Benchmark completed with {result.requests_per_second} RPS")
-```
-
-### 3. Async Benchmarking
+### 2. Async Benchmarking
 Run benchmarks with async clients:
 
 ```python
@@ -83,16 +68,16 @@ async def run_async_benchmark():
         client_library="aiohttp",
         is_async=True
     )
-    
+
     runner = AsyncBenchmarkRunner(config)
     result = await runner.run()
-    
+
     print(f"Async benchmark result: {result.requests_per_second} RPS")
 
 asyncio.run(run_async_benchmark())
 ```
 
-### 4. Configuration Options
+### 3. Configuration Options
 Create detailed benchmark configurations:
 
 ```python
@@ -112,7 +97,7 @@ config = BenchmarkConfiguration(
 )
 ```
 
-### 5. Storing Results
+### 4. Storing Results
 Save benchmark results to SQLite:
 
 ```python

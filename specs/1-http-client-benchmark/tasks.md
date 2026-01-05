@@ -181,24 +181,24 @@ Examples of foundational tasks (adjust based on your project):
 
 ---
 
-## Phase 7: User Story 5 - Use Decorator-Based Benchmarking (Priority: P3)
+## Phase 7: User Story 5 - Remove Decorator-Based Benchmarking (Priority: P3)
 
-**Goal**: Enable developers to use Python decorators to easily benchmark existing HTTP client code without significant code changes.
+**Goal**: Remove the decorator-based benchmarking functionality to simplify the framework and focus on core benchmarking capabilities.
 
-**Independent Test**: The framework provides decorator functionality that can wrap existing HTTP client calls and provide benchmark metrics.
-
-### Tests for User Story 5 (OPTIONAL - only if tests requested) ⚠️
-
-- [ ] T053 [P] [US5] Unit test for decorator functionality in tests/unit/test_decorators.py using unittest
+**Independent Test**: The framework operates without decorator functionality and all other features continue to work properly.
 
 ### Implementation for User Story 5
 
-- [X] T054 [P] [US5] Create decorator functionality in http_benchmark/decorators.py
-- [X] T055 [US5] Implement decorator that wraps HTTP client calls
-- [X] T056 [US5] Add configuration support to decorator
-- [X] T057 [US5] Integrate decorator with benchmark runner
+- [ ] T054 [US5] Remove decorator functionality from http_benchmark/decorators.py
+- [ ] T055 [US5] Remove decorator-related code from http_benchmark/benchmark.py
+- [ ] T056 [US5] Remove decorator import from http_benchmark/__init__.py
+- [ ] T057 [US5] Update documentation to remove decorator references
+- [ ] T058 [US5] Remove decorator test files and test cases
+- [ ] T059 [US5] Update quickstart guide to remove decorator examples
+- [ ] T060 [US5] Update API contracts documentation to remove decorator references
+- [ ] T061 [US5] Verify all functionality works without decorators
 
-**Checkpoint**: All user stories should now be independently functional
+**Checkpoint**: All user stories should now be functional without decorator features
 
 ---
 

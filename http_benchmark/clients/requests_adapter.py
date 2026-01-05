@@ -11,6 +11,7 @@ class RequestsAdapter(BaseHTTPAdapter):
     
     def __init__(self):
         super().__init__("requests")
+        self.session = requests.Session()
     
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the requests library."""
@@ -26,7 +27,7 @@ class RequestsAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
             
             # Make the request
-            response = requests.request(
+            response = self.session.request(
                 method=method,
                 url=url,
                 headers=headers,

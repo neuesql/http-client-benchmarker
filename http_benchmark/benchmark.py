@@ -108,55 +108,93 @@ class BenchmarkRunner:
     def _run_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
         """Run a synchronous benchmark."""
         app_logger.info("Running synchronous benchmark")
-        
+
         response_times = []
         error_count = 0
-        total_requests = self.config.total_requests or 1
-        
-        # If duration is specified instead of total_requests, calculate based on estimated RPS
-        if self.config.total_requests is None:
-            # For now, just run for the specified duration with a reasonable number of requests
-            total_requests = self.config.concurrency * 10  # 10 requests per concurrent thread
-        
-        # Create HTTP requests for the benchmark
-        requests = [http_request for _ in range(total_requests)]
-        
-        # Execute requests concurrently using ThreadPoolExecutor
+        start_time = time.time()
+        end_time = start_time + self.config.duration_seconds
+
+        # Execute requests concurrently using ThreadPoolExecutor for the specified duration
         with ThreadPoolExecutor(max_workers=self.config.concurrency) as executor:
-            futures = [executor.submit(adapter.make_request, req) for req in requests]
-            
-            for future in as_completed(futures):
-                result = future.result()
-                if result['success']:
-                    response_times.append(result['response_time'])
-                else:
-                    error_count += 1
-        
+            # Submit initial batch of requests
+            futures = set()
+            for _ in range(self.config.concurrency):
+                futures.add(executor.submit(adapter.make_request, http_request))
+
+            # Continue making requests for the specified duration
+            while time.time() < end_time:
+                completed_futures = []
+                for future in as_completed(futures, timeout=1):  # Use timeout to check duration periodically
+                    result = future.result()
+                    if result['success']:
+                        response_times.append(result['response_time'])
+                    else:
+                        error_count += 1
+
+                    # Submit a new request to keep the concurrency level
+                    if time.time() < end_time:
+                        futures.add(executor.submit(adapter.make_request, http_request))
+
+                    completed_futures.append(future)
+
+                # Remove completed futures
+                for future in completed_futures:
+                    futures.discard(future)
+
+                # If all futures completed before duration, submit more
+                while len(futures) < self.config.concurrency and time.time() < end_time:
+                    futures.add(executor.submit(adapter.make_request, http_request))
+
+        # Wait for any remaining requests to complete
+        for future in as_completed(futures):
+            result = future.result()
+            if result['success']:
+                response_times.append(result['response_time'])
+            else:
+                error_count += 1
+
         # Calculate metrics
         if response_times:
             avg_response_time = sum(response_times) / len(response_times)
-            min_response_time = min(response_times)
-            max_response_time = max(response_times)
-            
-            # Calculate percentiles
+            min_response_time = min(response_times) if response_times else 0
+            max_response_time = max(response_times) if response_times else 0
+
+            # Calculate percentiles using linear interpolation method
             sorted_times = sorted(response_times)
-            p95_idx = int(0.95 * len(sorted_times))
-            p99_idx = int(0.99 * len(sorted_times))
-            
-            p95_response_time = sorted_times[min(p95_idx, len(sorted_times) - 1)] if sorted_times else 0
-            p99_response_time = sorted_times[min(p99_idx, len(sorted_times) - 1)] if sorted_times else 0
+
+            def calculate_percentile(data, percentile):
+                if not data:
+                    return 0
+                n = len(data)
+                # Using the standard percentile formula: P = (percentile * (n - 1)) + 1
+                # Then interpolate between values if needed
+                rank = percentile * (n - 1)
+                lower_idx = int(rank)
+                upper_idx = min(lower_idx + 1, n - 1)
+
+                # Interpolate between the two values
+                fraction = rank - lower_idx
+                if lower_idx == upper_idx:
+                    return data[lower_idx]
+                else:
+                    lower_val = data[lower_idx]
+                    upper_val = data[upper_idx]
+                    return lower_val + fraction * (upper_val - lower_val)
+
+            p95_response_time = calculate_percentile(sorted_times, 0.95)
+            p99_response_time = calculate_percentile(sorted_times, 0.99)
         else:
             avg_response_time = 0
             min_response_time = 0
             max_response_time = 0
             p95_response_time = 0
             p99_response_time = 0
-        
+
         total_completed_requests = len(response_times) + error_count
-        duration = time.time() - time.time()  # Placeholder - in real implementation, track actual duration
-        requests_per_second = total_completed_requests / self.config.duration_seconds if self.config.duration_seconds > 0 else 0
+        actual_duration = time.time() - start_time
+        requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
         error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
-        
+
         return {
             'requests_count': total_completed_requests,
             'requests_per_second': requests_per_second,
@@ -172,55 +210,98 @@ class BenchmarkRunner:
     async def _run_async_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
         """Run an asynchronous benchmark."""
         app_logger.info("Running asynchronous benchmark")
-        
+
         response_times = []
         error_count = 0
-        total_requests = self.config.total_requests or 1
-        
-        # If duration is specified instead of total_requests, calculate based on estimated RPS
-        if self.config.total_requests is None:
-            # For now, just run for the specified duration with a reasonable number of requests
-            total_requests = self.config.concurrency * 10  # 10 requests per concurrent task
-        
-        # Create tasks for concurrent execution
-        tasks = []
-        for _ in range(total_requests):
+        start_time = asyncio.get_event_loop().time()
+        end_time = start_time + self.config.duration_seconds
+
+        # Create initial tasks for concurrent execution
+        tasks = set()
+        for _ in range(self.config.concurrency):
             task = adapter.make_request_async(http_request)
-            tasks.append(task)
-        
-        # Execute tasks concurrently
-        for coro in asyncio.as_completed(tasks):
-            result = await coro
-            if result['success']:
-                response_times.append(result['response_time'])
-            else:
-                error_count += 1
-        
+            tasks.add(asyncio.create_task(task))
+
+        # Continue making requests for the specified duration
+        while asyncio.get_event_loop().time() < end_time:
+            if not tasks:
+                break
+
+            # Wait for at least one task to complete
+            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
+
+            for task in done:
+                try:
+                    result = await task
+                    if result['success']:
+                        response_times.append(result['response_time'])
+                    else:
+                        error_count += 1
+                except Exception:
+                    error_count += 1
+
+            # Update tasks to include remaining pending tasks
+            tasks = pending
+
+            # If all tasks completed before duration, submit more
+            while len(tasks) < self.config.concurrency and asyncio.get_event_loop().time() < end_time:
+                new_task = adapter.make_request_async(http_request)
+                tasks.add(asyncio.create_task(new_task))
+
+        # Wait for any remaining tasks to complete
+        if tasks:
+            for task in asyncio.as_completed(tasks):
+                try:
+                    result = await task
+                    if result['success']:
+                        response_times.append(result['response_time'])
+                    else:
+                        error_count += 1
+                except Exception:
+                    error_count += 1
+
         # Calculate metrics
         if response_times:
             avg_response_time = sum(response_times) / len(response_times)
-            min_response_time = min(response_times)
-            max_response_time = max(response_times)
-            
-            # Calculate percentiles
+            min_response_time = min(response_times) if response_times else 0
+            max_response_time = max(response_times) if response_times else 0
+
+            # Calculate percentiles using linear interpolation method
             sorted_times = sorted(response_times)
-            p95_idx = int(0.95 * len(sorted_times))
-            p99_idx = int(0.99 * len(sorted_times))
-            
-            p95_response_time = sorted_times[min(p95_idx, len(sorted_times) - 1)] if sorted_times else 0
-            p99_response_time = sorted_times[min(p99_idx, len(sorted_times) - 1)] if sorted_times else 0
+
+            def calculate_percentile(data, percentile):
+                if not data:
+                    return 0
+                n = len(data)
+                # Using the standard percentile formula: P = (percentile * (n - 1)) + 1
+                # Then interpolate between values if needed
+                rank = percentile * (n - 1)
+                lower_idx = int(rank)
+                upper_idx = min(lower_idx + 1, n - 1)
+
+                # Interpolate between the two values
+                fraction = rank - lower_idx
+                if lower_idx == upper_idx:
+                    return data[lower_idx]
+                else:
+                    lower_val = data[lower_idx]
+                    upper_val = data[upper_idx]
+                    return lower_val + fraction * (upper_val - lower_val)
+
+            p95_response_time = calculate_percentile(sorted_times, 0.95)
+            p99_response_time = calculate_percentile(sorted_times, 0.99)
         else:
             avg_response_time = 0
             min_response_time = 0
             max_response_time = 0
             p95_response_time = 0
             p99_response_time = 0
-        
+
         total_completed_requests = len(response_times) + error_count
-        duration = time.time() - time.time()  # Placeholder - in real implementation, track actual duration
-        requests_per_second = total_completed_requests / self.config.duration_seconds if self.config.duration_seconds > 0 else 0
+        actual_duration = asyncio.get_event_loop().time() - start_time
+        requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
         error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
-        
+
         return {
             'requests_count': total_completed_requests,
             'requests_per_second': requests_per_second,

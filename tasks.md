@@ -1,166 +1,140 @@
-# Tasks: HTTP Client Performance Benchmark Framework
+# tasks.md: HTTP Client Performance Benchmark Framework
 
-**Feature**: HTTP Client Performance Benchmark Framework
-**Branch**: `1-http-client-benchmark`
-**Spec**: [specs/1-http-client-benchmark/spec.md](../specs/1-http-client-benchmark/spec.md)
-**Plan**: [specs/1-http-client-benchmark/plan.md](../specs/1-http-client-benchmark/plan.md)
+**Feature**: HTTP Client Performance Benchmark Framework  
+**Branch**: `1-http-client-benchmark`  
+**Generated**: 2026-01-05  
+**Input**: specs/1-http-client-benchmark/spec.md
 
 ## Implementation Strategy
 
-This document outlines the implementation tasks for the HTTP Client Performance Benchmark Framework. The approach follows an incremental delivery model with the following phases:
-
-1. **Setup Phase**: Project initialization and basic structure
-2. **Foundational Phase**: Core models and configuration
-3. **User Story Phases**: Implementation of each user story in priority order
-4. **Polish Phase**: Testing, documentation, and final touches
-
-The MVP scope will include User Story 1 (core benchmarking functionality) with basic support for one HTTP client library.
-
-## Dependencies
-
-- User Story 2 (sync/async support) depends on foundational models from Phase 2
-- User Story 3 (configuration) builds on foundational models
-- User Story 4 (storage) depends on BenchmarkResult model
-- User Story 5 (decorators) depends on core benchmarking functionality
-
-## Parallel Execution Examples
-
-- Client adapters can be implemented in parallel [P] once the base adapter is defined
-- Unit tests can be written in parallel [P] with implementation tasks
-- HTTP method support can be added in parallel [P] after core functionality exists
-
----
+**MVP Scope**: User Story 1 (P1) - Benchmark HTTP Client Performance  
+**Approach**: Incremental delivery with each user story as independently testable increment  
+**Focus**: Remove Decorators feature including logic, tests, and documentation
 
 ## Phase 1: Setup
 
-**Goal**: Initialize project structure and dependencies
+- [X] T001 Create project structure per implementation plan in http_benchmark/__init__.py
+- [X] T002 Initialize Python 3.12 project with uv package manager for HTTP client benchmarking framework, including Context7 for dependency documentation
+- [X] T003 [P] Configure linting and formatting tools
+- [X] T004 [P] Create pyproject.toml with dependencies (requests, requestx, httpx, aiohttp, urllib3, pycurl, pydantic-settings, loguru, sqlite3, psutil)
+- [X] T005 [P] Set up basic directory structure: http_benchmark/, tests/, docs/
 
-- [X] T001 Create project directory structure per implementation plan
-- [X] T002 Initialize pyproject.toml with dependencies (requests, requestx, httpx, aiohttp, urllib3, pycurl, pydantic-settings, loguru, psutil)
-- [X] T003 Create basic http_benchmark/__init__.py file
-- [X] T004 Set up logging configuration in http_benchmark/utils/logging.py
-- [X] T005 Create http_benchmark/utils/resource_monitor.py with basic structure
-- [X] T006 Create http_benchmark/models/base.py with base model classes
-- [X] T007 Create http_benchmark/clients/base.py with base adapter interface
+## Phase 2: Foundational Components (Blocking Prerequisites)
 
-## Phase 2: Foundational Models
-
-**Goal**: Implement core data models and configuration system
-
+- [X] T006 Setup SQLite database schema and migrations framework in http_benchmark/storage.py
+- [X] T007 [P] Create base models/entities that all stories depend on in http_benchmark/models/base.py
 - [X] T008 [P] Create BenchmarkResult model in http_benchmark/models/benchmark_result.py
 - [X] T009 [P] Create BenchmarkConfiguration model in http_benchmark/models/benchmark_configuration.py
 - [X] T010 [P] Create HTTPRequest model in http_benchmark/models/http_request.py
 - [X] T011 [P] Create ResourceMetrics model in http_benchmark/models/resource_metrics.py
-- [X] T012 Create configuration system using pydantic-settings in http_benchmark/config.py
-- [X] T013 Implement resource monitoring utilities in http_benchmark/utils/resource_monitor.py
+- [X] T012 Create base HTTP client adapter in http_benchmark/clients/base.py
+- [X] T013 Configure error handling and logging infrastructure using loguru in http_benchmark/utils/logging.py
+- [X] T014 Setup configuration management with pydantic-settings in http_benchmark/config.py
+- [X] T015 Setup resource monitoring with psutil in http_benchmark/utils/resource_monitor.py
 
-## Phase 3: User Story 1 - Benchmark HTTP Client Performance (P1)
+## Phase 3: [US1] Benchmark HTTP Client Performance (Priority: P1)
 
-**Goal**: Core functionality to benchmark HTTP client performance with metrics
+- [X] T016 [P] [US1] Unit test for requests adapter in tests/unit/test_requests_adapter.py using unittest
+- [X] T017 [P] [US1] Unit test for requestx adapter in tests/unit/test_requestx_adapter.py using unittest
+- [X] T018 [P] [US1] Unit test for httpx adapter in tests/unit/test_httpx_adapter.py using unittest
+- [X] T019 [P] [US1] Unit test for aiohttp adapter in tests/unit/test_aiohttp_adapter.py using unittest
+- [X] T020 [P] [US1] Unit test for urllib3 adapter in tests/unit/test_urllib3_adapter.py using unittest
+- [X] T021 [P] [US1] Unit test for pycurl adapter in tests/unit/test_pycurl_adapter.py using unittest
+- [X] T022 [P] [US1] Create requests adapter in http_benchmark/clients/requests_adapter.py
+- [X] T023 [P] [US1] Create requestx adapter in http_benchmark/clients/requestx_adapter.py
+- [X] T024 [P] [US1] Create httpx adapter in http_benchmark/clients/httpx_adapter.py
+- [X] T025 [P] [US1] Create aiohttp adapter in http_benchmark/clients/aiohttp_adapter.py
+- [X] T026 [P] [US1] Create urllib3 adapter in http_benchmark/clients/urllib3_adapter.py
+- [X] T027 [P] [US1] Create pycurl adapter in http_benchmark/clients/pycurl_adapter.py
+- [X] T028 [US1] Implement core benchmarking functionality in http_benchmark/benchmark.py
+- [X] T029 [US1] Add benchmark result collection and metrics in http_benchmark/benchmark.py
+- [X] T030 [US1] Implement basic benchmark runner in http_benchmark/benchmark.py
+- [X] T031 [US1] Add validation for client library selection in http_benchmark/benchmark.py
 
-**Independent Test**: Framework can execute performance benchmarks on HTTP requests using different client libraries and produce measurable metrics (response time, throughput, resource usage)
+## Phase 4: [US2] Support Synchronous and Asynchronous HTTP Methods (Priority: P1)
 
-- [X] T014 [P] [US1] Create base HTTP client adapter in http_benchmark/clients/base.py
-- [X] T015 [P] [US1] Create requests adapter in http_benchmark/clients/requests_adapter.py
-- [X] T016 [P] [US1] Create httpx adapter in http_benchmark/clients/httpx_adapter.py
-- [X] T017 [P] [US1] Create aiohttp adapter in http_benchmark/clients/aiohttp_adapter.py
-- [X] T018 [P] [US1] Create urllib3 adapter in http_benchmark/clients/urllib3_adapter.py
-- [X] T019 [P] [US1] Create pycurl adapter in http_benchmark/clients/pycurl_adapter.py
-- [X] T020 [P] [US1] Create requestx adapter in http_benchmark/clients/requestx_adapter.py
-- [X] T021 [US1] Implement core benchmarking functionality in http_benchmark/benchmark.py
-- [X] T022 [US1] Add basic benchmark result calculation logic
-- [X] T023 [US1] Implement synchronous benchmark execution
-- [X] T024 [US1] Test basic benchmark functionality with httpx client
+- [X] T032 [P] [US2] Unit test for sync benchmarking in tests/unit/test_sync_benchmark.py using unittest
+- [X] T033 [P] [US2] Unit test for async benchmarking in tests/unit/test_async_benchmark.py using unittest
+- [X] T034 [P] [US2] Create async benchmark runner in http_benchmark/benchmark.py
+- [X] T035 [US2] Update HTTP client adapters to support both sync and async methods
+- [X] T036 [US2] Implement async HTTP request handling in http_benchmark/clients/
+- [X] T037 [US2] Add is_async flag to BenchmarkConfiguration model
+- [X] T038 [US2] Implement concurrent request handling with threading for sync and asyncio for async
 
-## Phase 4: User Story 2 - Support Synchronous and Asynchronous HTTP Methods (P1)
+## Phase 5: [US3] Configure Benchmark Parameters (Priority: P2)
 
-**Goal**: Support both synchronous and asynchronous HTTP client methods
+- [X] T039 [P] [US3] Unit test for benchmark configuration in tests/unit/test_config.py using unittest
+- [X] T040 [P] [US3] Implement configuration validation in http_benchmark/config.py
+- [X] T041 [US3] Add concurrency parameter support to benchmark runner
+- [X] T042 [US3] Add duration and total_requests parameter support to benchmark runner
+- [X] T043 [US3] Add HTTP method selection support to benchmark runner
+- [X] T044 [US3] Add request headers and body support to benchmark runner
+- [X] T045 [US3] Add timeout and retry parameters to benchmark runner
 
-**Independent Test**: Framework can benchmark both sync and async HTTP methods and provide comparative performance metrics
+## Phase 6: [US4] Store and Compare Performance Metrics (Priority: P2)
 
-- [X] T025 [US2] Extend benchmark.py to support asynchronous execution
-- [X] T026 [P] [US2] Update httpx adapter to support async requests
-- [X] T027 [P] [US2] Update aiohttp adapter to support async requests
-- [X] T028 [US2] Implement async benchmark execution logic
-- [X] T029 [US2] Test async benchmark functionality with httpx and aiohttp
-- [X] T030 [US2] Test sync vs async performance comparison
+- [X] T046 [P] [US4] Unit test for result storage in tests/unit/test_storage.py using unittest
+- [X] T047 [P] [US4] Unit test for result comparison in tests/unit/test_comparison.py using unittest
+- [X] T048 [P] [US4] Implement SQLite storage functionality in http_benchmark/storage.py
+- [X] T049 [US4] Add save_result method to store BenchmarkResult objects
+- [X] T050 [US4] Add get_results_by_name method to retrieve results
+- [X] T051 [US4] Implement result comparison functionality in http_benchmark/storage.py
+- [X] T052 [US4] Add API endpoints for results management in http_benchmark/cli/main.py
 
-## Phase 5: User Story 3 - Configure Benchmark Parameters (P2)
+## Phase 7: [US5] Remove Decorator-Based Benchmarking (Priority: P3)
 
-**Goal**: Allow configuration of benchmark parameters (concurrency, duration, request types)
+- [X] T054 [US5] Remove decorator functionality from http_benchmark/decorators.py
+- [X] T055 [US5] Remove decorator-related code from http_benchmark/benchmark.py
+- [X] T056 [US5] Remove decorator import from http_benchmark/__init__.py
+- [X] T057 [US5] Update documentation to remove decorator references
+- [X] T058 [US5] Remove decorator test files and test cases
+- [X] T059 [US5] Update quickstart guide to remove decorator examples
+- [X] T060 [US5] Update API contracts documentation to remove decorator references
+- [X] T061 [US5] Verify all functionality works without decorators
 
-**Independent Test**: Framework accepts configuration parameters and adjusts the benchmarking process accordingly
+## Phase 8: Polish & Cross-Cutting Concerns
 
-- [X] T031 [US3] Enhance BenchmarkConfiguration model with all required fields
-- [X] T032 [US3] Add support for different HTTP methods (DELETE, GET, PATCH, POST, PUT, STREAM) in HTTPRequest model
-- [X] T033 [US3] Implement HTTP method support in all client adapters
-- [X] T034 [US3] Add concurrency and duration configuration to benchmark execution
-- [X] T035 [US3] Test configuration with different parameters
-- [X] T036 [US3] Test all HTTP methods with different client libraries
+- [X] T058 [P] Documentation updates in docs/
+- [X] T059 [P] CLI interface implementation in http_benchmark/cli/main.py
+- [ ] T062 [P] Additional unit tests (if requested) in tests/unit/ using unittest framework
+- [ ] T063 [P] Integration tests for HTTP clients in tests/integration/test_http_clients.py using testcontainers on port 8080
+- [ ] T064 [P] End-to-end tests in tests/integration/test_end_to_end.py using testcontainers on port 8080
+- [ ] T065 [P] Contract tests based on API contracts in tests/contract/test_api_contracts.py using unittest
+- [X] T065 Code cleanup and refactoring
+- [X] T066 Performance optimization across all stories
+- [X] T067 Security hardening for credential handling
+- [X] T068 Run quickstart.md validation
 
-## Phase 6: User Story 4 - Store and Compare Performance Metrics (P2)
+## Dependencies
 
-**Goal**: Store benchmark results and compare performance metrics across different runs
+**User Story Completion Order**:
+- US1 (P1) → US2 (P1) → US3 (P2) → US4 (P2) → US5 (P3)
 
-**Independent Test**: Framework saves benchmark results to SQLite database and allows comparison between different benchmark runs
+**Dependencies**:
+- US2 requires foundational components from Phase 2
+- US3 requires configuration model from Phase 2
+- US4 requires storage implementation from Phase 2
+- US5 (removal) can be done independently after core functionality is established
 
-- [X] T037 [US4] Create ResultStorage class in http_benchmark/storage.py
-- [X] T038 [US4] Implement SQLite database schema for benchmark results
-- [X] T039 [US4] Implement save_result method in ResultStorage
-- [X] T040 [US4] Implement retrieve methods in ResultStorage (get_result_by_id, get_results_by_name, get_all_results)
-- [X] T041 [US4] Implement compare_results method in ResultStorage
-- [X] T042 [US4] Test database storage and retrieval functionality
-- [X] T043 [US4] Test result comparison functionality
+## Parallel Execution Examples
 
-## Phase 7: User Story 5 - Use Decorator-Based Benchmarking (P3)
+**Per User Story**:
+- US5: T054-T061 can be parallelized by removing different decorator-related components in parallel
 
-**Goal**: Provide decorator functionality to easily benchmark existing HTTP client code
+## Implementation Strategy
 
-**Independent Test**: Framework provides decorator functionality that can wrap existing HTTP client code and provide benchmark metrics
+### MVP First (User Story 1 Only)
 
-- [X] T044 [US5] Create decorator functionality in http_benchmark/decorators.py
-- [X] T045 [US5] Implement benchmark decorator with configuration options
-- [X] T046 [US5] Test decorator functionality with sample HTTP client code
-- [X] T047 [US5] Add decorator documentation and examples
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
+3. Complete Phase 3: User Story 1
+4. **STOP and VALIDATE**: Test User Story 1 independently
+5. Deploy/demo if ready
 
-## Phase 8: CLI Implementation
+### Focus on Decorator Removal
 
-**Goal**: Implement command-line interface for easy benchmark execution
-
-- [X] T048 Create CLI main module in http_benchmark/cli/main.py
-- [X] T049 Implement argument parsing for all required CLI options
-- [X] T050 Implement single benchmark execution via CLI
-- [X] T051 Implement multiple client comparison via CLI
-- [X] T052 Test CLI functionality with various parameters
-- [X] T053 Add CLI help and documentation
-
-## Phase 9: Testing
-
-**Goal**: Implement comprehensive test coverage using unittest framework
-
-- [X] T054 [P] Create test suite structure in tests/ directory
-- [X] T055 [P] Create unit tests for models in tests/unit/test_models.py
-- [X] T056 [P] Create unit tests for configuration in tests/unit/test_config.py
-- [X] T057 [P] Create unit tests for resource monitoring in tests/unit/test_resource_monitor.py
-- [X] T058 [P] Create unit tests for client adapters in tests/unit/test_adapters.py
-- [X] T059 [P] Create unit tests for benchmark functionality in tests/unit/test_benchmark.py
-- [X] T060 [P] Create unit tests for storage functionality in tests/unit/test_storage.py
-- [X] T061 [P] Create unit tests for decorators in tests/unit/test_decorators.py
-- [X] T062 [P] Create integration tests for end-to-end functionality in tests/integration/test_end_to_end.py
-- [X] T063 [P] Create integration tests for CLI functionality in tests/integration/test_cli.py
-- [X] T064 [P] Create performance tests to validate measurement accuracy in tests/performance/test_accuracy.py
-
-## Phase 10: Polish & Cross-Cutting Concerns
-
-**Goal**: Final implementation touches, documentation, and error handling
-
-- [X] T065 Add comprehensive error handling and graceful degradation
-- [X] T066 Implement retry mechanisms for failed requests
-- [X] T067 Add security measures for handling sensitive configuration
-- [X] T068 Create comprehensive README.md with usage examples
-- [X] T069 Update documentation with API reference
-- [X] T070 Perform final testing and validation of all features
-- [X] T071 Optimize performance to ensure <5% overhead on HTTP clients
-- [X] T072 Validate sub-10ms response time measurement accuracy
-- [X] T073 Test framework with up to 10,000 concurrent requests
-- [X] T074 Final validation against all success criteria from spec.md
+For the current task of removing decorators:
+1. Complete Phase 7: Remove decorator functionality
+2. Update documentation and tests
+3. Verify all functionality works without decorators
+4. Clean up any remaining references

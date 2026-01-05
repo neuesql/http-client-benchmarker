@@ -4,7 +4,6 @@ import os
 from http_benchmark.benchmark import BenchmarkRunner
 from http_benchmark.models.benchmark_configuration import BenchmarkConfiguration
 from http_benchmark.storage import ResultStorage
-from http_benchmark.decorators import benchmark
 
 
 class TestEndToEndFunctionality(unittest.TestCase):
