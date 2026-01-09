@@ -1,6 +1,7 @@
 """Urllib3 HTTP client adapter for the HTTP benchmark framework."""
 
 import urllib3
+import time
 from typing import Dict, Any
 from .base import BaseHTTPAdapter
 from ..models.http_request import HTTPRequest
@@ -35,11 +36,11 @@ class Urllib3Adapter(BaseHTTPAdapter):
             body = request.body if request.body else None
 
             # Make the request
-            start_time = __import__("time").time()
+            start_time = time.time()
             response = http.request(
                 method=method, url=url, headers=headers, body=body, timeout=timeout
             )
-            end_time = __import__("time").time()
+            end_time = time.time()
 
             # Return response data
             return {
@@ -63,15 +64,8 @@ class Urllib3Adapter(BaseHTTPAdapter):
             }
 
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
-        """Make an async HTTP request using the urllib3 library.
-
-        Note: urllib3 is synchronous, so this just calls the sync version.
-        For true async support, use the httpx or aiohttp adapters.
-        """
-        import asyncio
-
-        await asyncio.sleep(0.01)  # Simulate async operation
-        return self.make_request(request)
+        """Make an async HTTP request using the urllib3 library."""
+        raise NotImplementedError("urllib3 is sync-only")
 
     def close(self) -> None:
         """Close the urllib3 pool managers."""

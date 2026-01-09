@@ -1,8 +1,7 @@
 """RequestX HTTP client adapter for the HTTP benchmark framework."""
 
-# Note: requestx is not a standard library, so we'll simulate its interface
-# In a real implementation, this would import the actual requestx library
 import time
+import asyncio
 from typing import Any, Dict
 
 import requestx
@@ -75,14 +74,28 @@ class RequestXAdapter(BaseHTTPAdapter):
             # Prepare data based on method
             data = request.body if request.body else None
 
-            # Make the async request (assuming requestx has async support)
-            # For now, using a mock async implementation
-            import asyncio
+            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
+            if data is not None:
+                kwargs["data"] = data
 
-            await asyncio.sleep(0.01)  # Simulate async operation
+            # Make the async request
+            start_time = asyncio.get_event_loop().time()
+            response = await requestx.request(method, url, **kwargs)
+            end_time = asyncio.get_event_loop().time()
 
-            # Fallback to sync for demonstration
-            return self.make_request(request)
+            response_time = end_time - start_time
+            if hasattr(response, "elapsed"):
+                response_time = response.elapsed.total_seconds()
+
+            return {
+                "status_code": response.status_code,
+                "headers": dict(response.headers),
+                "content": response.text,
+                "response_time": response_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+            }
         except Exception as e:
             return {
                 "status_code": None,
