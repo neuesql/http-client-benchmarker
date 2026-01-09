@@ -1,9 +1,17 @@
-version: '3.8'
-
 services:
-  httpbin:
+  httpbin1:
     image: kennethreitz/httpbin
-    container_name: httpbin
+    container_name: httpbin1
+    restart: unless-stopped
+
+  httpbin2:
+    image: kennethreitz/httpbin
+    container_name: httpbin2
+    restart: unless-stopped
+
+  httpbin3:
+    image: kennethreitz/httpbin
+    container_name: httpbin3
     restart: unless-stopped
 
   nginx:
@@ -16,5 +24,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
     depends_on:
-      - httpbin
+      - httpbin1
+      - httpbin2
+      - httpbin3
     restart: unless-stopped
