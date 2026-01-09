@@ -15,11 +15,12 @@ class RequestXAdapter(BaseHTTPAdapter):
 
     def __init__(self):
         super().__init__("requestx")
+        self.session = requestx.Session()
+        self.async_session = requestx.Session()
 
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the requestx library."""
         try:
-            # Prepare the request
             method = request.method.upper()
             url = request.url
             headers = request.headers
@@ -33,14 +34,13 @@ class RequestXAdapter(BaseHTTPAdapter):
                 kwargs["data"] = data
 
             start_time = time.time()
-            response = requestx.request(method, url, **kwargs)
+            response = self.session.request(method, url, **kwargs)
             end_time = time.time()
 
             response_time = end_time - start_time
             if hasattr(response, "elapsed"):
                 response_time = response.elapsed.total_seconds()
 
-            # Return response data
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
@@ -64,23 +64,20 @@ class RequestXAdapter(BaseHTTPAdapter):
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an async HTTP request using the requestx library."""
         try:
-            # Prepare the request
             method = request.method.upper()
             url = request.url
             headers = request.headers
             timeout = request.timeout
             verify_ssl = request.verify_ssl
 
-            # Prepare data based on method
             data = request.body if request.body else None
 
             kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
             if data is not None:
                 kwargs["data"] = data
 
-            # Make the async request
             start_time = asyncio.get_event_loop().time()
-            response = await requestx.request(method, url, **kwargs)
+            response = await self.async_session.request(method, url, **kwargs)
             end_time = asyncio.get_event_loop().time()
 
             response_time = end_time - start_time
@@ -108,4 +105,11 @@ class RequestXAdapter(BaseHTTPAdapter):
             }
 
     def close(self) -> None:
-        pass
+        """Close the requestx session."""
+        if hasattr(self, "session"):
+            self.session.close()
+
+    async def close_async(self) -> None:
+        """Close the requestx session asynchronously."""
+        if hasattr(self, "async_session"):
+            self.async_session.close()
