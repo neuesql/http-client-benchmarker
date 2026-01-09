@@ -14,28 +14,43 @@ class HttpxAdapter(BaseHTTPAdapter):
 
     def __init__(self):
         super().__init__("httpx")
+        self.client = None
+        self.async_client = None
+
+    def __enter__(self):
+        """Initialize sync client when entering sync context."""
         self.client = httpx.Client()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close sync client when exiting sync context."""
+        if self.client:
+            self.client.close()
+
+    async def __aenter__(self):
+        """Initialize async client when entering async context."""
         self.async_client = httpx.AsyncClient()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Close async client when exiting async context."""
+        if self.async_client:
+            await self.async_client.aclose()
 
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the httpx library."""
         try:
-            # Prepare the request
             method = request.method.upper()
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
-            # Prepare data based on method
             data = request.body if request.body else None
 
-            # Make the request
             response = self.client.request(
                 method=method, url=url, headers=headers, content=data, timeout=timeout
             )
 
-            # Return response data
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
@@ -59,24 +74,19 @@ class HttpxAdapter(BaseHTTPAdapter):
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an async HTTP request using the httpx library."""
         try:
-            # Prepare the request
             method = request.method.upper()
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
-            # Prepare data based on method
             data = request.body if request.body else None
 
-            # Make the async request
             start_time = asyncio.get_event_loop().time()
             response = await self.async_client.request(
                 method=method, url=url, headers=headers, content=data, timeout=timeout
             )
             end_time = asyncio.get_event_loop().time()
 
-            # Return response data
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
@@ -96,18 +106,3 @@ class HttpxAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
-
-    def close(self) -> None:
-        """Close the httpx clients."""
-        if hasattr(self, "client"):
-            self.client.close()
-
-    async def close_async(self) -> None:
-        """Close the httpx clients asynchronously."""
-        if hasattr(self, "async_client"):
-            try:
-                loop = asyncio.get_event_loop()
-                if not loop.is_running():
-                    loop.run_until_complete(self.async_client.aclose())
-            except Exception as ex:
-                print(ex)

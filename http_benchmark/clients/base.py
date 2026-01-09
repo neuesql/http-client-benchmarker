@@ -10,6 +10,7 @@ class BaseHTTPAdapter(ABC):
 
     def __init__(self, name: str):
         self.name = name
+        self._session = None
 
     @abstractmethod
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
@@ -21,10 +22,18 @@ class BaseHTTPAdapter(ABC):
         """Make an async HTTP request and return response data."""
         pass
 
-    def close(self) -> None:
-        """Close any open resources (connections, sessions, etc.)."""
+    def __enter__(self):
+        """Initialize session when entering sync context."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close session when exiting sync context."""
         pass
 
-    async def close_async(self) -> None:
-        """Close any open resources asynchronously."""
+    async def __aenter__(self):
+        """Initialize session when entering async context."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Close session when exiting async context."""
         pass

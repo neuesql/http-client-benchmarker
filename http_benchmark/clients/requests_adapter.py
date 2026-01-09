@@ -11,22 +11,29 @@ class RequestsAdapter(BaseHTTPAdapter):
 
     def __init__(self):
         super().__init__("requests")
+        self.session = None
+
+    def __enter__(self):
+        """Initialize session when entering sync context."""
         self.session = requests.Session()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close session when exiting sync context."""
+        if self.session:
+            self.session.close()
 
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the requests library."""
         try:
-            # Prepare the request
             method = request.method.upper()
             url = request.url
             headers = request.headers
             timeout = request.timeout
             verify_ssl = request.verify_ssl
 
-            # Prepare data based on method
             data = request.body if request.body else None
 
-            # Make the request
             response = self.session.request(
                 method=method,
                 url=url,
@@ -36,7 +43,6 @@ class RequestsAdapter(BaseHTTPAdapter):
                 verify=verify_ssl,
             )
 
-            # Return response data
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
@@ -60,7 +66,3 @@ class RequestsAdapter(BaseHTTPAdapter):
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an async HTTP request using the requests library."""
         raise NotImplementedError("requests is sync-only")
-
-    def close(self) -> None:
-        """Close the requests session."""
-        self.session.close()

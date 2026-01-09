@@ -15,8 +15,28 @@ class RequestXAdapter(BaseHTTPAdapter):
 
     def __init__(self):
         super().__init__("requestx")
+        self.session = None
+        self.async_session = None
+
+    def __enter__(self):
+        """Initialize session when entering sync context."""
         self.session = requestx.Session()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close session when exiting sync context."""
+        if self.session:
+            self.session.close()
+
+    async def __aenter__(self):
+        """Initialize session when entering async context."""
         self.async_session = requestx.Session()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Close session when exiting async context."""
+        if self.async_session:
+            self.async_session.close()
 
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the requestx library."""
@@ -103,13 +123,3 @@ class RequestXAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
-
-    def close(self) -> None:
-        """Close the requestx session."""
-        if hasattr(self, "session"):
-            self.session.close()
-
-    async def close_async(self) -> None:
-        """Close the requestx session asynchronously."""
-        if hasattr(self, "async_session"):
-            self.async_session.close()

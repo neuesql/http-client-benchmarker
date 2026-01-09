@@ -1,22 +1,22 @@
 """Core benchmarking functionality for the HTTP benchmark framework."""
 
-import time
 import asyncio
-import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-from .models.benchmark_result import BenchmarkResult
-from .models.benchmark_configuration import BenchmarkConfiguration
-from .models.http_request import HTTPRequest
+from typing import Dict, Any
+
+from .clients.aiohttp_adapter import AiohttpAdapter
+from .clients.httpx_adapter import HttpxAdapter
+from .clients.pycurl_adapter import PycurlAdapter
 from .clients.requests_adapter import RequestsAdapter
 from .clients.requestx_adapter import RequestXAdapter
-from .clients.httpx_adapter import HttpxAdapter
-from .clients.aiohttp_adapter import AiohttpAdapter
 from .clients.urllib3_adapter import Urllib3Adapter
-from .clients.pycurl_adapter import PycurlAdapter
-from .utils.resource_monitor import resource_monitor
+from .models.benchmark_configuration import BenchmarkConfiguration
+from .models.benchmark_result import BenchmarkResult
+from .models.http_request import HTTPRequest
 from .utils.logging import app_logger
+from .utils.resource_monitor import resource_monitor
 
 
 class BenchmarkRunner:
@@ -43,16 +43,13 @@ class BenchmarkRunner:
 
         start_time = datetime.now()
 
-        # Validate configuration
         if self.config.client_library not in self.adapter_classes:
             raise ValueError(
                 f"Unsupported client library: {self.config.client_library}"
             )
 
-        # Get the appropriate adapter
-        adapter = self.adapter_classes[self.config.client_library]()
+        adapter_class = self.adapter_classes[self.config.client_library]
 
-        # Prepare the HTTP request
         http_request = HTTPRequest(
             method=self.config.http_method,
             url=self.config.target_url,
@@ -62,25 +59,18 @@ class BenchmarkRunner:
             verify_ssl=self.config.verify_ssl,
         )
 
-        # Collect initial resource metrics
         initial_metrics = resource_monitor.get_all_metrics()
 
-        # Run the benchmark based on sync/async configuration
         if self.config.is_async:
-            result = asyncio.run(self._run_async_benchmark(adapter, http_request))
+            result = asyncio.run(self._run_async_benchmark(adapter_class, http_request))
         else:
-            result = self._run_sync_benchmark(adapter, http_request)
+            result = self._run_sync_benchmark(adapter_class, http_request)
 
-        # Collect final resource metrics
         final_metrics = resource_monitor.get_all_metrics()
-
-        if hasattr(adapter, "close"):
-            adapter.close()
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
 
-        # Calculate average resource usage
         cpu_usage_avg = (
             initial_metrics["cpu_percent"] + final_metrics["cpu_percent"]
         ) / 2
@@ -89,7 +79,6 @@ class BenchmarkRunner:
             + final_metrics["memory_info"]["percent"]
         ) / 2
 
-        # Create and return the benchmark result
         benchmark_result = BenchmarkResult(
             name=self.config.name,
             client_library=self.config.client_library,
@@ -119,9 +108,14 @@ class BenchmarkRunner:
         )
         return benchmark_result
 
-    def _run_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
+    def _run_sync_benchmark(self, adapter_class, http_request: HTTPRequest) -> Dict[str, Any]:
         """Run a synchronous benchmark."""
         app_logger.info("Running synchronous benchmark")
+
+        with adapter_class() as adapter:
+            return self._execute_sync_benchmark(adapter, http_request)
+
+    def _execute_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
 
         response_times = []
         error_count = 0
@@ -244,10 +238,17 @@ class BenchmarkRunner:
         }
 
     async def _run_async_benchmark(
-        self, adapter, http_request: HTTPRequest
+        self, adapter_class, http_request: HTTPRequest
     ) -> Dict[str, Any]:
         """Run an asynchronous benchmark."""
         app_logger.info("Running asynchronous benchmark")
+
+        async with adapter_class() as adapter:
+            return await self._execute_async_benchmark(adapter, http_request)
+
+    async def _execute_async_benchmark(
+        self, adapter, http_request: HTTPRequest
+    ) -> Dict[str, Any]:
 
         response_times = []
         error_count = 0
@@ -354,12 +355,6 @@ class BenchmarkRunner:
             if total_completed_requests > 0
             else 0
         )
-
-        if hasattr(adapter, "close_async"):
-            await adapter.close_async()
-        elif hasattr(adapter, "close"):
-            adapter.close()
-
         return {
             "requests_count": total_completed_requests,
             "requests_per_second": requests_per_second,
@@ -371,21 +366,3 @@ class BenchmarkRunner:
             "error_count": error_count,
             "error_rate": error_rate,
         }
-
-
-class AsyncBenchmarkRunner(BenchmarkRunner):
-    """Asynchronous benchmark runner that extends the base functionality."""
-
-    async def run(self) -> BenchmarkResult:
-        """Run the benchmark asynchronously."""
-        return await self._run_async_benchmark(
-            self.adapter_classes[self.config.client_library](),
-            HTTPRequest(
-                method=self.config.http_method,
-                url=self.config.target_url,
-                headers=self.config.headers,
-                body=self.config.body,
-                timeout=self.config.timeout,
-                verify_ssl=self.config.verify_ssl,
-            ),
-        )
