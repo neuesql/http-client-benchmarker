@@ -1,10 +1,12 @@
 """HTTPX HTTP client adapter for the HTTP benchmark framework."""
 
-import httpx
 import asyncio
-from typing import Dict, Any
-from .base import BaseHTTPAdapter
+from typing import Any, Dict
+
+import httpx
+
 from ..models.http_request import HTTPRequest
+from .base import BaseHTTPAdapter
 
 
 class HttpxAdapter(BaseHTTPAdapter):

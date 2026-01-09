@@ -2,29 +2,13 @@
 
 # Note: requestx is not a standard library, so we'll simulate its interface
 # In a real implementation, this would import the actual requestx library
-try:
-    import requestx
-
-    REQUESTX_AVAILABLE = True
-except ImportError:
-    REQUESTX_AVAILABLE = False
-
-    # For now, we'll simulate the interface
-    class MockRequestX:
-        @staticmethod
-        def request(method, url, **kwargs):
-            # This is a mock implementation for demonstration
-            import requests  # Fallback to requests for simulation
-
-            return requests.request(method, url, **kwargs)
-
-    requestx = MockRequestX()
-
-
-from typing import Dict, Any
 import time
-from .base import BaseHTTPAdapter
+from typing import Any, Dict
+
+import requestx
+
 from ..models.http_request import HTTPRequest
+from .base import BaseHTTPAdapter
 
 
 class RequestXAdapter(BaseHTTPAdapter):

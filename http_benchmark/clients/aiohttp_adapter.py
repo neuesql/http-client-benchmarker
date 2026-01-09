@@ -144,8 +144,8 @@ class AiohttpAdapter(BaseHTTPAdapter):
                 loop = getattr(self.session, "_loop", None)
                 if loop and not loop.is_closed() and not loop.is_running():
                     loop.run_until_complete(self.session.close())
-            except Exception:
-                pass
+            except Exception as ex:
+                print(ex)
 
     async def close_async(self) -> None:
         """Close the aiohttp session asynchronously."""
