@@ -69,3 +69,7 @@ class Urllib3Adapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
+
+    async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async HTTP request using the urllib3 library."""
+        raise NotImplementedError("urllib3 is sync-only, use make_request instead")

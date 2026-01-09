@@ -33,6 +33,10 @@ class AiohttpAdapter(BaseHTTPAdapter):
             await self.session.close()
             await asyncio.sleep(0.250)
 
+    def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an HTTP request using the aiohttp library."""
+        raise NotImplementedError("aiohttp is async-only, use make_request_async instead")
+
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an async HTTP request using the aiohttp library."""
         try:

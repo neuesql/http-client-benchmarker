@@ -369,29 +369,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             "Errors",
         ]
 
-        if TABULATE_AVAILABLE:
-            print(tabulate(table_data, headers=headers, tablefmt="grid"))
-        else:
-            # Simple fallback table
-            print(
-                f"{'Client':<12} {'Type':<6} {'RPS':<10} {'Reqs':<8} {'Dur(s)':<8} {'Conc':<6} {'Avg(ms)':<8} {'P95(ms)':<8} {'CPU%':<6} {'Mem%':<6} {'Errors':<6}"
-            )
-            print("-" * 100)
-            for row in table_data:
-                if row[2] == "FAILED":
-                    print(f"{row[0]:<12} {row[1]:<6} FAILED")
-                else:
-                    print(
-                        f"{row[0]:<12} {row[1]:<6} {row[2]:<10} {row[3]:<8} {row[4]:<8} {row[5]:<6} {row[6]:<8} {row[7]:<8} {row[9]:<6} {row[10]:<6} {row[11]:<6}"
-                    )
-            print("-" * 80)
-            for row in table_data:
-                if row[2] == "FAILED":
-                    print(f"{row[0]:<12} {row[1]:<6} FAILED")
-                else:
-                    print(
-                        f"{row[0]:<12} {row[1]:<6} {row[2]:<10} {row[3]:<8} {row[4]:<8} {row[5]:<8} {row[7]:<6} {row[8]:<6} {row[9]:<6}"
-                    )
+        print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
         # If we got results from multiple clients, verify they all completed
         if len(results) > 1:
