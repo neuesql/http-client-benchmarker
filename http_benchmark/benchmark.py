@@ -21,33 +21,37 @@ from .utils.logging import app_logger
 
 class BenchmarkRunner:
     """Core benchmarking functionality for HTTP client performance testing."""
-    
+
     def __init__(self, config: BenchmarkConfiguration):
         self.config = config
-        self.adapters = {
-            'requests': RequestsAdapter(),
-            'requestx': RequestXAdapter(),
-            'httpx': HttpxAdapter(),
-            'aiohttp': AiohttpAdapter(),
-            'urllib3': Urllib3Adapter(),
-            'pycurl': PycurlAdapter()
+        self.adapter_classes = {
+            "requests": RequestsAdapter,
+            "requestx": RequestXAdapter,
+            "httpx": HttpxAdapter,
+            "aiohttp": AiohttpAdapter,
+            "urllib3": Urllib3Adapter,
+            "pycurl": PycurlAdapter,
         }
         self.results = []
         self.resource_metrics = []
-    
+
     def run(self) -> BenchmarkResult:
         """Run the benchmark with the given configuration."""
-        app_logger.info(f"Starting benchmark for {self.config.target_url} using {self.config.client_library}")
-        
+        app_logger.info(
+            f"Starting benchmark for {self.config.target_url} using {self.config.client_library}"
+        )
+
         start_time = datetime.now()
-        
+
         # Validate configuration
-        if self.config.client_library not in self.adapters:
-            raise ValueError(f"Unsupported client library: {self.config.client_library}")
-        
+        if self.config.client_library not in self.adapter_classes:
+            raise ValueError(
+                f"Unsupported client library: {self.config.client_library}"
+            )
+
         # Get the appropriate adapter
-        adapter = self.adapters[self.config.client_library]
-        
+        adapter = self.adapter_classes[self.config.client_library]()
+
         # Prepare the HTTP request
         http_request = HTTPRequest(
             method=self.config.http_method,
@@ -55,28 +59,36 @@ class BenchmarkRunner:
             headers=self.config.headers,
             body=self.config.body,
             timeout=self.config.timeout,
-            verify_ssl=self.config.verify_ssl
+            verify_ssl=self.config.verify_ssl,
         )
-        
+
         # Collect initial resource metrics
         initial_metrics = resource_monitor.get_all_metrics()
-        
+
         # Run the benchmark based on sync/async configuration
         if self.config.is_async:
             result = asyncio.run(self._run_async_benchmark(adapter, http_request))
         else:
             result = self._run_sync_benchmark(adapter, http_request)
-        
+
         # Collect final resource metrics
         final_metrics = resource_monitor.get_all_metrics()
-        
+
+        if hasattr(adapter, "close"):
+            adapter.close()
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
-        
+
         # Calculate average resource usage
-        cpu_usage_avg = (initial_metrics['cpu_percent'] + final_metrics['cpu_percent']) / 2
-        memory_usage_avg = (initial_metrics['memory_info']['percent'] + final_metrics['memory_info']['percent']) / 2
-        
+        cpu_usage_avg = (
+            initial_metrics["cpu_percent"] + final_metrics["cpu_percent"]
+        ) / 2
+        memory_usage_avg = (
+            initial_metrics["memory_info"]["percent"]
+            + final_metrics["memory_info"]["percent"]
+        ) / 2
+
         # Create and return the benchmark result
         benchmark_result = BenchmarkResult(
             name=self.config.name,
@@ -86,25 +98,27 @@ class BenchmarkRunner:
             start_time=start_time,
             end_time=end_time,
             duration=duration,
-            requests_count=result['requests_count'],
-            requests_per_second=result['requests_per_second'],
-            avg_response_time=result['avg_response_time'],
-            min_response_time=result['min_response_time'],
-            max_response_time=result['max_response_time'],
-            p95_response_time=result['p95_response_time'],
-            p99_response_time=result['p99_response_time'],
+            requests_count=result["requests_count"],
+            requests_per_second=result["requests_per_second"],
+            avg_response_time=result["avg_response_time"],
+            min_response_time=result["min_response_time"],
+            max_response_time=result["max_response_time"],
+            p95_response_time=result["p95_response_time"],
+            p99_response_time=result["p99_response_time"],
             cpu_usage_avg=cpu_usage_avg,
             memory_usage_avg=memory_usage_avg,
-            network_io=final_metrics['network_io'],
-            error_count=result['error_count'],
-            error_rate=result['error_rate'],
+            network_io=final_metrics["network_io"],
+            error_count=result["error_count"],
+            error_rate=result["error_rate"],
             concurrency_level=self.config.concurrency,
-            config_snapshot=self.config.to_dict()
+            config_snapshot=self.config.to_dict(),
         )
-        
-        app_logger.info(f"Benchmark completed: {benchmark_result.requests_per_second} RPS")
+
+        app_logger.info(
+            f"Benchmark completed: {benchmark_result.requests_per_second} RPS"
+        )
         return benchmark_result
-    
+
     def _run_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
         """Run a synchronous benchmark."""
         app_logger.info("Running synchronous benchmark")
@@ -125,18 +139,24 @@ class BenchmarkRunner:
             while time.time() < end_time:
                 completed_futures = []
                 try:
-                    for future in as_completed(futures, timeout=1):  # Use timeout to check duration periodically
+                    for future in as_completed(
+                        futures, timeout=1
+                    ):  # Use timeout to check duration periodically
                         result = future.result()
-                        if result['success']:
-                            response_times.append(result['response_time'])
+                        if result["success"]:
+                            response_times.append(result["response_time"])
                         else:
                             error_count += 1
-                            if error_count <= 5: # Limit error logging
-                                app_logger.error(f"Request failed: {result.get('error', 'Unknown error')}")
+                            if error_count <= 5:  # Limit error logging
+                                app_logger.error(
+                                    f"Request failed: {result.get('error', 'Unknown error')}"
+                                )
 
                         # Submit a new request to keep the concurrency level
                         if time.time() < end_time:
-                            futures.add(executor.submit(adapter.make_request, http_request))
+                            futures.add(
+                                executor.submit(adapter.make_request, http_request)
+                            )
 
                         completed_futures.append(future)
                 except TimeoutError:
@@ -146,7 +166,7 @@ class BenchmarkRunner:
                     # Handle other potential errors during execution
                     # app_logger.error(f"Error in future processing: {str(e)}")
                     pass
-                
+
                 # Remove completed futures
                 for future in completed_futures:
                     futures.discard(future)
@@ -158,8 +178,8 @@ class BenchmarkRunner:
         # Wait for any remaining requests to complete
         for future in as_completed(futures):
             result = future.result()
-            if result['success']:
-                response_times.append(result['response_time'])
+            if result["success"]:
+                response_times.append(result["response_time"])
             else:
                 error_count += 1
 
@@ -202,22 +222,30 @@ class BenchmarkRunner:
 
         total_completed_requests = len(response_times) + error_count
         actual_duration = time.time() - start_time
-        requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
-        error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
+        requests_per_second = (
+            total_completed_requests / actual_duration if actual_duration > 0 else 0
+        )
+        error_rate = (
+            (error_count / total_completed_requests) * 100
+            if total_completed_requests > 0
+            else 0
+        )
 
         return {
-            'requests_count': total_completed_requests,
-            'requests_per_second': requests_per_second,
-            'avg_response_time': avg_response_time,
-            'min_response_time': min_response_time,
-            'max_response_time': max_response_time,
-            'p95_response_time': p95_response_time,
-            'p99_response_time': p99_response_time,
-            'error_count': error_count,
-            'error_rate': error_rate
+            "requests_count": total_completed_requests,
+            "requests_per_second": requests_per_second,
+            "avg_response_time": avg_response_time,
+            "min_response_time": min_response_time,
+            "max_response_time": max_response_time,
+            "p95_response_time": p95_response_time,
+            "p99_response_time": p99_response_time,
+            "error_count": error_count,
+            "error_rate": error_rate,
         }
-    
-    async def _run_async_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
+
+    async def _run_async_benchmark(
+        self, adapter, http_request: HTTPRequest
+    ) -> Dict[str, Any]:
         """Run an asynchronous benchmark."""
         app_logger.info("Running asynchronous benchmark")
 
@@ -238,17 +266,21 @@ class BenchmarkRunner:
                 break
 
             # Wait for at least one task to complete
-            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
+            done, pending = await asyncio.wait(
+                tasks, return_when=asyncio.FIRST_COMPLETED, timeout=1.0
+            )
 
             for task in done:
                 try:
                     result = await task
-                    if result['success']:
-                        response_times.append(result['response_time'])
+                    if result["success"]:
+                        response_times.append(result["response_time"])
                     else:
                         error_count += 1
-                        if error_count <= 5: # Limit error logging
-                             app_logger.error(f"Request failed: {result.get('error', 'Unknown error')}")
+                        if error_count <= 5:  # Limit error logging
+                            app_logger.error(
+                                f"Request failed: {result.get('error', 'Unknown error')}"
+                            )
                 except Exception:
                     error_count += 1
 
@@ -256,7 +288,10 @@ class BenchmarkRunner:
             tasks = pending
 
             # If all tasks completed before duration, submit more
-            while len(tasks) < self.config.concurrency and asyncio.get_event_loop().time() < end_time:
+            while (
+                len(tasks) < self.config.concurrency
+                and asyncio.get_event_loop().time() < end_time
+            ):
                 new_task = adapter.make_request_async(http_request)
                 tasks.add(asyncio.create_task(new_task))
 
@@ -265,8 +300,8 @@ class BenchmarkRunner:
             for task in asyncio.as_completed(tasks):
                 try:
                     result = await task
-                    if result['success']:
-                        response_times.append(result['response_time'])
+                    if result["success"]:
+                        response_times.append(result["response_time"])
                     else:
                         error_count += 1
                 except Exception:
@@ -311,35 +346,46 @@ class BenchmarkRunner:
 
         total_completed_requests = len(response_times) + error_count
         actual_duration = asyncio.get_event_loop().time() - start_time
-        requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
-        error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
+        requests_per_second = (
+            total_completed_requests / actual_duration if actual_duration > 0 else 0
+        )
+        error_rate = (
+            (error_count / total_completed_requests) * 100
+            if total_completed_requests > 0
+            else 0
+        )
+
+        if hasattr(adapter, "close_async"):
+            await adapter.close_async()
+        elif hasattr(adapter, "close"):
+            adapter.close()
 
         return {
-            'requests_count': total_completed_requests,
-            'requests_per_second': requests_per_second,
-            'avg_response_time': avg_response_time,
-            'min_response_time': min_response_time,
-            'max_response_time': max_response_time,
-            'p95_response_time': p95_response_time,
-            'p99_response_time': p99_response_time,
-            'error_count': error_count,
-            'error_rate': error_rate
+            "requests_count": total_completed_requests,
+            "requests_per_second": requests_per_second,
+            "avg_response_time": avg_response_time,
+            "min_response_time": min_response_time,
+            "max_response_time": max_response_time,
+            "p95_response_time": p95_response_time,
+            "p99_response_time": p99_response_time,
+            "error_count": error_count,
+            "error_rate": error_rate,
         }
 
 
 class AsyncBenchmarkRunner(BenchmarkRunner):
     """Asynchronous benchmark runner that extends the base functionality."""
-    
+
     async def run(self) -> BenchmarkResult:
         """Run the benchmark asynchronously."""
         return await self._run_async_benchmark(
-            self.adapters[self.config.client_library],
+            self.adapter_classes[self.config.client_library](),
             HTTPRequest(
                 method=self.config.http_method,
                 url=self.config.target_url,
                 headers=self.config.headers,
                 body=self.config.body,
                 timeout=self.config.timeout,
-                verify_ssl=self.config.verify_ssl
-            )
+                verify_ssl=self.config.verify_ssl,
+            ),
         )
