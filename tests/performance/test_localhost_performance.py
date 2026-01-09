@@ -220,6 +220,7 @@ class TestLocalhostPerformance(unittest.TestCase):
         client_libraries = [
             "requests",
             "httpx",
+            "httpx-async",
             "aiohttp",
             "urllib3",
             "pycurl",
@@ -233,13 +234,15 @@ class TestLocalhostPerformance(unittest.TestCase):
         print("=" * 80)
 
         for client in client_libraries:
-            is_async = client == "aiohttp"
+            is_async = client == "aiohttp" or client == "httpx-async"
+            # Use "httpx" as the actual client library for httpx-async
+            actual_client = "httpx" if client == "httpx-async" else client
             config = BenchmarkConfiguration(
                 target_url=self.LOCALHOST_URL,
                 http_method="GET",
                 concurrency=self.TEST_CONCURRENCY,
                 duration_seconds=self.TEST_DURATION,
-                client_library=client,
+                client_library=actual_client,
                 is_async=is_async,
                 timeout=self.TIMEOUT,
             )
