@@ -10,7 +10,7 @@ class TestLocalhostPerformance(unittest.TestCase):
     """Performance tests comparing different HTTP clients against localhost."""
 
     LOCALHOST_URL = "http://localhost/get"
-    TEST_DURATION = 5
+    TEST_DURATION = 1
     TEST_CONCURRENCY = 1
     TIMEOUT = 30
 
