@@ -102,6 +102,8 @@ class HttpxAdapter(BaseHTTPAdapter):
         if hasattr(self, "client"):
             self.client.close()
 
+    async def close_async(self) -> None:
+        """Close the httpx clients asynchronously."""
         if hasattr(self, "async_client"):
             try:
                 loop = asyncio.get_event_loop()
@@ -109,11 +111,3 @@ class HttpxAdapter(BaseHTTPAdapter):
                     loop.run_until_complete(self.async_client.aclose())
             except Exception as ex:
                 print(ex)
-
-    async def close_async(self) -> None:
-        """Close the httpx clients asynchronously."""
-        if hasattr(self, "client"):
-            self.client.close()
-
-        if hasattr(self, "async_client"):
-            await self.async_client.aclose()

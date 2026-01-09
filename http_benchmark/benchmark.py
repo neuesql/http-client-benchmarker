@@ -165,7 +165,7 @@ class BenchmarkRunner:
                 except Exception as e:
                     # Handle other potential errors during execution
                     # app_logger.error(f"Error in future processing: {str(e)}")
-                    pass
+                    print(e)
 
                 # Remove completed futures
                 for future in completed_futures:
