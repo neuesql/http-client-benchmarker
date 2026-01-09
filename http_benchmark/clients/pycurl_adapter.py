@@ -108,3 +108,6 @@ class PycurlAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
+
+    async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        raise NotImplementedError("Pycurl is sync-only")

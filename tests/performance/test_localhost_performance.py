@@ -119,6 +119,72 @@ class TestLocalhostPerformance(unittest.TestCase):
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
+    def test_httpx_async_localhost_performance(self):
+        """Test httpx async library performance against localhost."""
+        config = BenchmarkConfiguration(
+            target_url=self.LOCALHOST_URL,
+            http_method="GET",
+            concurrency=self.TEST_CONCURRENCY,
+            duration_seconds=self.TEST_DURATION,
+            client_library="httpx",
+            is_async=True,
+            timeout=self.TIMEOUT,
+        )
+
+        runner = BenchmarkRunner(config)
+
+        try:
+            result = runner.run()
+
+            self.assertGreaterEqual(result.requests_count, 0)
+            self.assertGreaterEqual(result.requests_per_second, 0)
+            self.assertGreaterEqual(result.avg_response_time, 0)
+
+            print(
+                f"\n[httpx-async] RPS: {result.requests_per_second:.2f}, "
+                f"Avg Time: {result.avg_response_time * 1000:.2f}ms, "
+                f"P95: {result.p95_response_time * 1000:.2f}ms, "
+                f"P99: {result.p99_response_time * 1000:.2f}ms, "
+                f"Errors: {result.error_count}"
+            )
+
+        except Exception as e:
+            self.assertIsNotNone(runner)
+            self.assertIsNotNone(config)
+
+    def test_requestx_async_localhost_performance(self):
+        """Test requestx async library performance against localhost."""
+        config = BenchmarkConfiguration(
+            target_url=self.LOCALHOST_URL,
+            http_method="GET",
+            concurrency=self.TEST_CONCURRENCY,
+            duration_seconds=self.TEST_DURATION,
+            client_library="requestx",
+            is_async=True,
+            timeout=self.TIMEOUT,
+        )
+
+        runner = BenchmarkRunner(config)
+
+        try:
+            result = runner.run()
+
+            self.assertGreaterEqual(result.requests_count, 0)
+            self.assertGreaterEqual(result.requests_per_second, 0)
+            self.assertGreaterEqual(result.avg_response_time, 0)
+
+            print(
+                f"\n[requestx-async] RPS: {result.requests_per_second:.2f}, "
+                f"Avg Time: {result.avg_response_time * 1000:.2f}ms, "
+                f"P95: {result.p95_response_time * 1000:.2f}ms, "
+                f"P99: {result.p99_response_time * 1000:.2f}ms, "
+                f"Errors: {result.error_count}"
+            )
+
+        except Exception as e:
+            self.assertIsNotNone(runner)
+            self.assertIsNotNone(config)
+
     def test_urllib3_localhost_performance(self):
         """Test urllib3 library performance against localhost."""
         config = BenchmarkConfiguration(
@@ -225,6 +291,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             "urllib3",
             "pycurl",
             "requestx",
+            "requestx-async",
         ]
         results = {}
         table_data = []
@@ -234,9 +301,9 @@ class TestLocalhostPerformance(unittest.TestCase):
         print("=" * 80)
 
         for client in client_libraries:
-            is_async = client == "aiohttp" or client == "httpx-async"
-            # Use "httpx" as the actual client library for httpx-async
-            actual_client = "httpx" if client == "httpx-async" else client
+            is_async = client in ("aiohttp", "httpx-async", "requestx-async")
+            # Use the actual client library name for non-async variants
+            actual_client = client.replace("-async", "")
             config = BenchmarkConfiguration(
                 target_url=self.LOCALHOST_URL,
                 http_method="GET",
@@ -347,26 +414,6 @@ class TestLocalhostPerformance(unittest.TestCase):
             print(
                 f"\nFastest client: {best_client[0]} ({best_client[1].requests_per_second:.2f} RPS)"
             )
-
-            runner = BenchmarkRunner(config)
-
-            try:
-                result = runner.run()
-                results[client] = result
-
-                print(
-                    f"\n{client.upper():15} | "
-                    f"RPS: {result.requests_per_second:8.2f} | "
-                    f"Avg: {result.avg_response_time * 1000:7.2f}ms | "
-                    f"P95: {result.p95_response_time * 1000:7.2f}ms | "
-                    f"P99: {result.p99_response_time * 1000:7.2f}ms | "
-                    f"Errors: {result.error_count:3}"
-                )
-
-            except Exception as e:
-                self.assertIsNotNone(runner)
-                self.assertIsNotNone(config)
-                print(f"\n{client.upper():15} | FAILED: {str(e)}")
 
         print("\n" + "=" * 80)
 
