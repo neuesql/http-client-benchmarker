@@ -27,4 +27,4 @@ class BaseHTTPAdapter(ABC):
 
     async def close_async(self) -> None:
         """Close any open resources asynchronously."""
-        self.close()
+        pass
