@@ -1,15 +1,7 @@
 """Performance tests for different HTTP clients targeting localhost with GET requests."""
 
 import unittest
-
-try:
-    from tabulate import tabulate
-
-    TABULATE_AVAILABLE = True
-except ImportError:
-    TABULATE_AVAILABLE = False
-    tabulate = None
-
+from tabulate import tabulate
 from http_benchmark.benchmark import BenchmarkRunner
 from http_benchmark.models.benchmark_configuration import BenchmarkConfiguration
 
