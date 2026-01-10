@@ -76,3 +76,4 @@ Thumbs.db
 .qwen
 .specify
 .logs
+httpbin_server/certs
