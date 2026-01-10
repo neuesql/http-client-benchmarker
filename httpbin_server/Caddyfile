@@ -1,8 +1,18 @@
 {
     admin off
+    auto_https off
+    http_port 80
+    https_port 443
 }
 
-localhost {
+http://localhost {
+    reverse_proxy httpbin1:80 httpbin2:80 httpbin3:80 {
+        lb_policy round_robin
+    }
+}
+
+https://localhost {
+    tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
     reverse_proxy httpbin1:80 httpbin2:80 httpbin3:80 {
         lb_policy round_robin
     }
