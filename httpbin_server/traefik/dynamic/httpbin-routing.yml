@@ -1,0 +1,22 @@
+http:
+  routers:
+    httpbin-http:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - http
+      service: httpbin
+    httpbin-https:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - https
+      service: httpbin
+      tls: true
+
+  services:
+    httpbin:
+      loadBalancer:
+        servers:
+          - url: "http://httpbin1:80"
+          - url: "http://httpbin2:80"
+          - url: "http://httpbin3:80"
+        passHostHeader: true
