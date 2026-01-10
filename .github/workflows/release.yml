@@ -9,7 +9,6 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    environment: prod  # Use the prod environment with PYPI_TOKEN secret
     
     steps:
     - name: Checkout code
