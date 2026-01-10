@@ -6,12 +6,6 @@ on:
     types:
       - completed
     branches: [main]
-  workflow_dispatch:  # Allow manual triggering
-    inputs:
-      version:
-        description: 'Version to release (e.g., 1.2.3)'
-        required: true
-        type: string
 
 env:
   PYTHON_VERSION: '3.12'
@@ -32,7 +26,6 @@ jobs:
           fi
         fi
         echo "✅ Proceeding with release"
-        echo "run_release=true" >> $GITHUB_OUTPUT
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -49,16 +42,18 @@ jobs:
       run: |
         uv sync --all-extras --dev
 
-    - name: Get version
-      id: version
+    - name: Set VERSION from pyproject.toml
+      id: get-version
       run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ github.event.inputs.version }}"
-        else
-          # Extract version from pyproject.toml for workflow_run events
-          VERSION=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])" 2>/dev/null || echo "0.1.0")
+        # Read version using grep and awk (no additional dependencies needed)
+        VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'"' '{print $2}')
+        
+        if [[ -z "$VERSION" ]]; then
+          echo "❌ Failed to read version from pyproject.toml"
+          exit 1
         fi
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "📦 Release version: $VERSION"
 
     - name: Build package
@@ -75,7 +70,7 @@ jobs:
         echo "🚀 Publishing to PyPI..."
         echo "Package files in dist/:"
         ls -la dist/
-        uv publish --token "$UV_PUBLISH_TOKEN" dist/http_client_benchmarker-*.tar.gz dist/http_client_benchmarker-*.whl
+        uv publish --token "$UV_PUBLISH_TOKEN" dist/http_client_benchmarker-${{ env.VERSION }}.tar.gz dist/http_client_benchmarker-${{ env.VERSION }}.whl
         echo "✅ Published to PyPI successfully"
 
     - name: Create GitHub Release
@@ -83,25 +78,25 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
-        tag_name: v${{ steps.version.outputs.version }}
-        name: Release v${{ steps.version.outputs.version }}
+        tag_name: v${{ env.VERSION }}
+        name: Release v${{ env.VERSION }}
         body: |
-          ## 🚀 HTTP Client Benchmarker v${{ steps.version.outputs.version }}
+          ## 🚀 HTTP Client Benchmarker v${{ env.VERSION }}
           
           **⚡ Performance benchmarking for your HTTP stack**
           
           ### 📦 Installation
           ```bash
           # Using pip
-          pip install http-client-benchmarker==${{ steps.version.outputs.version }}
+          pip install http-client-benchmarker==${{ env.VERSION }}
           
           # Using uv (recommended)
-          uv add http-client-benchmarker==${{ steps.version.outputs.version }}
+          uv add http-client-benchmarker==${{ env.VERSION }}
           ```
           
           ### 🔧 Package Details
           - **Package**: http-client-benchmarker
-          - **Version**: v${{ steps.version.outputs.version }}
+          - **Version**: v${{ env.VERSION }}
           - **Python**: 3.12+
           - **Package Manager**: uv
           
