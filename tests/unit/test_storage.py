@@ -233,9 +233,7 @@ class TestResultStorage(unittest.TestCase):
         cursor = conn.cursor()
 
         # Check if the table exists
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='benchmark_results';"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='benchmark_results';")
         table_exists = cursor.fetchone()
         self.assertIsNotNone(table_exists, "benchmark_results table should exist")
 

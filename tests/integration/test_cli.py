@@ -58,9 +58,7 @@ class TestCLIIntegration(unittest.TestCase):
     @patch("http_benchmark.cli.BenchmarkRunner")
     @patch("http_benchmark.cli.BenchmarkConfiguration")
     @patch("http_benchmark.cli.ResultStorage")
-    def test_run_single_benchmark_mocked(
-        self, mock_storage_class, mock_config_class, mock_runner_class
-    ):
+    def test_run_single_benchmark_mocked(self, mock_storage_class, mock_config_class, mock_runner_class):
         """Test run_single_benchmark function with mocked dependencies."""
         from http_benchmark.cli import run_single_benchmark
         import argparse
@@ -119,9 +117,7 @@ class TestCLIIntegration(unittest.TestCase):
     @patch("http_benchmark.cli.BenchmarkRunner")
     @patch("http_benchmark.cli.BenchmarkConfiguration")
     @patch("http_benchmark.cli.ResultStorage")
-    def test_compare_clients_mocked(
-        self, mock_storage_class, mock_config_class, mock_runner_class
-    ):
+    def test_compare_clients_mocked(self, mock_storage_class, mock_config_class, mock_runner_class):
         """Test compare_clients function with mocked dependencies."""
         from http_benchmark.cli import compare_clients
         import argparse
@@ -172,9 +168,7 @@ class TestCLIIntegration(unittest.TestCase):
         self.assertEqual(mock_config_class.call_count, 2)  # Called once for each client
         self.assertEqual(mock_runner_class.call_count, 2)  # Called once for each client
         self.assertEqual(mock_runner.run.call_count, 2)  # Called once for each client
-        self.assertEqual(
-            mock_storage.save_result.call_count, 2
-        )  # Called once for each client
+        self.assertEqual(mock_storage.save_result.call_count, 2)  # Called once for each client
 
 
 class TestCLIStructure(unittest.TestCase):

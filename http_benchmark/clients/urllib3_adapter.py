@@ -45,9 +45,7 @@ class Urllib3Adapter(BaseHTTPAdapter):
             body = request.body if request.body else None
 
             start_time = time.time()
-            response = http.request(
-                method=method, url=url, headers=headers, body=body, timeout=timeout
-            )
+            response = http.request(method=method, url=url, headers=headers, body=body, timeout=timeout)
             end_time = time.time()
 
             return {

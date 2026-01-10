@@ -50,14 +50,8 @@ class ResourceMonitor:
             disk_io = psutil.disk_io_counters()
             if disk_io:
                 return {
-                    "read_mb": (
-                        disk_io.read_bytes / 1024 / 1024 if disk_io.read_bytes else 0.0
-                    ),
-                    "write_mb": (
-                        disk_io.write_bytes / 1024 / 1024
-                        if disk_io.write_bytes
-                        else 0.0
-                    ),
+                    "read_mb": (disk_io.read_bytes / 1024 / 1024 if disk_io.read_bytes else 0.0),
+                    "write_mb": (disk_io.write_bytes / 1024 / 1024 if disk_io.write_bytes else 0.0),
                 }
             else:
                 return {"read_mb": 0.0, "write_mb": 0.0}

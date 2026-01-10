@@ -39,9 +39,7 @@ class TestLocalhostPerformance(unittest.TestCase):
         table_data = []
 
         print("\n" + "=" * 80)
-        print(
-            f"HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - {'HTTPS' if is_https else 'HTTP'})"
-        )
+        print(f"HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - {'HTTPS' if is_https else 'HTTP'})")
         print("=" * 80)
 
         for client in client_libraries:
@@ -132,9 +130,7 @@ class TestLocalhostPerformance(unittest.TestCase):
                 self.assertGreaterEqual(result.avg_response_time, 0)
 
             best_client = max(results.items(), key=lambda x: x[1].requests_per_second)
-            print(
-                f"\nFastest client: {best_client[0]} ({best_client[1].requests_per_second:.2f} RPS)"
-            )
+            print(f"\nFastest client: {best_client[0]} ({best_client[1].requests_per_second:.2f} RPS)")
 
         print("\n" + "=" * 80)
 

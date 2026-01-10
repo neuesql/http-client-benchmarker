@@ -48,9 +48,7 @@ class HttpxAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            response = self.client.request(
-                method=method, url=url, headers=headers, content=data, timeout=timeout
-            )
+            response = self.client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
 
             return {
                 "status_code": response.status_code,

@@ -25,6 +25,7 @@ dependencies = [
     "pycurl>=7.45.0",
     "loguru>=0.7.0",
     "psutil>=5.9.0",
+    "twine>=6.2.0",
 ]
 
 [project.optional-dependencies]

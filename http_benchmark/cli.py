@@ -10,9 +10,7 @@ from .utils.logging import app_logger
 
 def main():
     """Main entry point for the CLI."""
-    parser = argparse.ArgumentParser(
-        description="HTTP Client Performance Benchmark Framework"
-    )
+    parser = argparse.ArgumentParser(description="HTTP Client Performance Benchmark Framework")
     parser.add_argument("--url", required=True, help="Target URL to benchmark")
     parser.add_argument(
         "--client",
@@ -26,21 +24,13 @@ def main():
         choices=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "STREAM"],
         help="HTTP method to use",
     )
-    parser.add_argument(
-        "--concurrency", type=int, default=10, help="Number of concurrent requests"
-    )
-    parser.add_argument(
-        "--duration", type=int, default=30, help="Duration of benchmark in seconds"
-    )
+    parser.add_argument("--concurrency", type=int, default=10, help="Number of concurrent requests")
+    parser.add_argument("--duration", type=int, default=30, help="Duration of benchmark in seconds")
     parser.add_argument("--headers", help="HTTP headers in JSON format")
     parser.add_argument("--body", help="Request body content")
-    parser.add_argument(
-        "--async", dest="is_async", action="store_true", help="Use async requests"
-    )
+    parser.add_argument("--async", dest="is_async", action="store_true", help="Use async requests")
     parser.add_argument("--output", help="Output file for results")
-    parser.add_argument(
-        "--compare", nargs="+", help="Compare multiple client libraries"
-    )
+    parser.add_argument("--compare", nargs="+", help="Compare multiple client libraries")
     parser.add_argument(
         "--verify-ssl",
         dest="verify_ssl",
@@ -156,9 +146,7 @@ def compare_clients(args) -> None:
 
     # Print comparison
     print(f"\nComparison Results for {args.url}:")
-    print(
-        f"{'Client':<12} {'RPS':<10} {'Avg Time':<12} {'Error Rate':<12} {'CPU %':<8} {'Memory MB':<10}"
-    )
+    print(f"{'Client':<12} {'RPS':<10} {'Avg Time':<12} {'Error Rate':<12} {'CPU %':<8} {'Memory MB':<10}")
     print("-" * 70)
 
     for result in results:
