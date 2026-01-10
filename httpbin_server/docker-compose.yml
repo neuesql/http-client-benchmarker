@@ -3,16 +3,40 @@ services:
     image: kennethreitz/httpbin
     container_name: httpbin1
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
   httpbin2:
     image: kennethreitz/httpbin
     container_name: httpbin2
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
   httpbin3:
     image: kennethreitz/httpbin
     container_name: httpbin3
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
   nginx:
     image: nginx:alpine
@@ -28,3 +52,11 @@ services:
       - httpbin2
       - httpbin3
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
