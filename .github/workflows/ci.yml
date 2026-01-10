@@ -15,36 +15,35 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
         python-version: '3.12'
+        cache-dependency-path: 'uv.lock'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install uv
-        uv pip install -e ".[dev]"
+        uv sync --all-extras --dev
 
     - name: Check code format with Black
       run: |
-        black http_benchmark/ tests/ --line-length 120 --check --diff
+        uv run black http_benchmark/ tests/ --line-length 120 --check --diff
 
     - name: Lint code with Flake8
       run: |
-        flake8 http_benchmark/ tests/ --max-line-length=120
+        uv run flake8 http_benchmark/ tests/ --max-line-length=120
 
     - name: Type check with MyPy
       run: |
-        mypy http_benchmark/
+        uv run mypy http_benchmark/
 
     - name: Run unit tests
       run: |
-        python -m unittest discover tests/unit -v
+        uv run python -m unittest discover tests/unit -v
 
     - name: Run integration tests
       run: |
-        python -m unittest discover tests/integration -v
+        uv run python -m unittest discover tests/integration -v
 
     - name: Verify no performance tests are included
       run: |
@@ -53,7 +52,7 @@ jobs:
 
     - name: Check package structure
       run: |
-        python -c "
+        uv run python -c "
         import sys
         sys.path.insert(0, '.')
         try:
@@ -61,6 +60,23 @@ jobs:
             print('✅ Package import successful')
         except ImportError as e:
             print(f'❌ Import error: {e}')
+            sys.exit(1)
+        "
+
+    - name: Verify package build with uv
+      run: |
+        echo "Testing package build capability..."
+        uv run python -c "
+        import subprocess
+        import sys
+        
+        # Test that we can build the package
+        result = subprocess.run([sys.executable, '-m', 'build', '--help'], 
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print('✅ Package build tools available')
+        else:
+            print('❌ Package build tools not available')
             sys.exit(1)
         "
 
