@@ -272,10 +272,10 @@ python -m unittest discover tests/performance
 ### 🎨 Linting and Formatting
 ```bash
 # Code formatting
-black http_benchmark/ tests/
+black http_benchmark/
 
 # Linting
-flake8 http_benchmark/ tests/
+flake8 http_benchmark/ --max-line-length=250
 ```
 
 ## 🏗️ Architecture Details

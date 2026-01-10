@@ -1,7 +1,7 @@
 """Base HTTP client adapter for the HTTP benchmark framework."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from ..models.http_request import HTTPRequest
 
 

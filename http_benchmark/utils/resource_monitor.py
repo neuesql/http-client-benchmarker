@@ -2,7 +2,7 @@
 
 import psutil
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime
 
 
@@ -30,7 +30,7 @@ class ResourceMonitor:
     def get_network_io(self) -> Dict[str, int]:
         """Get network I/O statistics."""
         # Get initial network stats
-        initial_net = psutil.net_io_counters()
+        psutil.net_io_counters()
 
         # Wait a bit to get a more accurate reading
         time.sleep(0.1)
@@ -61,7 +61,7 @@ class ResourceMonitor:
                 }
             else:
                 return {"read_mb": 0.0, "write_mb": 0.0}
-        except:
+        except Exception:
             return {"read_mb": 0.0, "write_mb": 0.0}
 
     def get_all_metrics(self) -> Dict[str, Any]:

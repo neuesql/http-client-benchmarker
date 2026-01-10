@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-from typing import Dict, Any
 from .benchmark import BenchmarkRunner
 from .models.benchmark_configuration import BenchmarkConfiguration
 from .storage import ResultStorage
@@ -103,7 +102,7 @@ def run_single_benchmark(args) -> None:
     result = runner.run()
 
     # Print results
-    print(f"Benchmark Results:")
+    print("Benchmark Results:")
     print(f"  Client Library: {result.client_library}")
     print(f"  URL: {result.url}")
     print(f"  HTTP Method: {result.http_method}")

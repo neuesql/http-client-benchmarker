@@ -1,7 +1,7 @@
 """Benchmark configuration model for the HTTP benchmark framework."""
 
 import uuid
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from .base import BaseModel
 
 

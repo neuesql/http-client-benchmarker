@@ -1,7 +1,7 @@
 """Configuration management for the HTTP benchmark framework."""
 
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from typing import List
 
 
 class BenchmarkSettings(BaseSettings):
