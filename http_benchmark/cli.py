@@ -3,10 +3,10 @@
 import argparse
 import sys
 from typing import Dict, Any
-from ..benchmark import BenchmarkRunner
-from ..models.benchmark_configuration import BenchmarkConfiguration
-from ..storage import ResultStorage
-from ..utils.logging import app_logger
+from .benchmark import BenchmarkRunner
+from .models.benchmark_configuration import BenchmarkConfiguration
+from .storage import ResultStorage
+from .utils.logging import app_logger
 
 
 def main():
@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--async", dest="is_async", action="store_true", help="Use async requests")
     parser.add_argument("--output", help="Output file for results")
     parser.add_argument("--compare", nargs='+', help="Compare multiple client libraries")
+    parser.add_argument("--verify-ssl", dest="verify_ssl", action="store_true", default=False,
+                        help="Enable SSL verification (disabled by default)")
     
     args = parser.parse_args()
 
@@ -68,7 +70,8 @@ def run_single_benchmark(args) -> None:
         concurrency=args.concurrency,
         duration_seconds=args.duration,
         client_library=args.client,
-        is_async=args.is_async
+        is_async=args.is_async,
+        verify_ssl=args.verify_ssl
     )
     
     # Run the benchmark
@@ -114,7 +117,8 @@ def compare_clients(args) -> None:
             concurrency=args.concurrency,
             duration_seconds=args.duration,
             client_library=client,
-            is_async=args.is_async
+            is_async=args.is_async,
+            verify_ssl=args.verify_ssl
         )
         
         # Run the benchmark

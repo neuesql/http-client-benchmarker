@@ -1,6 +1,12 @@
-# HTTP Client Performance Benchmark Framework
+# HTTP Client & Server Performance Benchmark Framework
 
 Technical framework for benchmarking and comparing Python HTTP client library performance. Supports synchronous and asynchronous execution models, providing metrics for throughput, latency, and system resource utilization.
+
+## 🌟 Motivation & Purpose
+
+This framework helps developers test and evaluate HTTP clients and servers across different use cases including streaming, GET, POST, PUT, PATCH, DELETE operations. By providing comprehensive performance metrics with persistent storage, teams can make data-driven decisions to select the best HTTP client library or server configuration for their specific needs.
+
+**Key Value**: Persistent results storage enables data-driven decisions for optimal performance.
 
 ## 🏗️ Architecture
 
@@ -10,23 +16,22 @@ The framework consists of a CLI/API entry point, an extensible adapter layer for
 
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   CLI/API       │    │   HTTP Client   │    │   HTTP Server   │
-│   Benchmark     │───▶│   (requests/    │───▶│   (httpbin)     │
-│   Config        │    │    httpx/etc)   │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-                                │                       │
-                                ▼                       ▼
+│   CLI/API       │    │   HTTP Client   │    │   Test Server   │
+│   Benchmark     │───▶│   (requests/    │───▶│   (httpbin/     │
+│   Config        │    │    httpx/etc)   │    │    traefik/     │
+└─────────────────┘    └─────────────────┘    │    nginx)       │
+                                 │            └─────────────────┘
+                                 │                       │
+                                 ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Console       │◀───│   Results       │◀───│   Response      │
-│   Output        │    │   Processing    │    │   Collection    │
-│                 │    │   (RPS, Latency│    │                 │
-└─────────────────┘    │   Error Rate)   │    └─────────────────┘
-                       └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   SQLite DB     │
+│   Console       │◀───│   Results       │◀───│   Performance   │
+│   Output        │    │   Processing    │    │   Metrics       │
+│                 │    │                 │    │   Collection    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+          │                       │
+          │                       ▼
+          │            ┌─────────────────┐
+          └───────────▶│   SQLite DB     │
                        │   Storage       │
                        └─────────────────┘
 ```
@@ -60,26 +65,130 @@ The benchmark framework compares HTTP client performance by measuring response t
 ## ⚡ Quick Start
 
 ### 🖥️ 1. Start Test Server
-Select a server configuration:
-- **Load Balanced (Recommended)**: Traefik + 3 httpbin instances
-  ```bash
-  docker-compose -f httpbin_server/docker-compose.yml up -d
-  ```
-- **Simple**: Single httpbin instance
-  ```bash
-  docker-compose -f httpbin_server/docker-compose.simple.yml up -d
-  ```
+
+Select one of the following server configurations based on your testing requirements:
+
+#### **Option 1: Simple HTTPBin (Single Instance)**
+- **File**: `httpbin_server/docker-compose.httpbin.yml`
+- **Features**: Single httpbin instance, HTTP only, minimal resource usage
+- **Use case**: Basic testing, debugging, quick validation
+- **Command**: `docker-compose -f httpbin_server/docker-compose.httpbin.yml up -d`
+- **Endpoint**: `http://localhost/`
+
+#### **Option 2: Traefik Load Balancer (3 Instances)**
+- **File**: `httpbin_server/docker-compose.traefik.yml`
+- **Features**: Traefik reverse proxy, 3 load-balanced httpbin instances, HTTP/HTTPS support
+- **Use case**: Production-like load balancing, advanced routing, comprehensive benchmarking
+- **Command**: `docker-compose -f httpbin_server/docker-compose.traefik.yml up -d`
+- **Endpoints**: `http://localhost/` and `https://localhost/`
+
+#### **Option 3: Nginx Load Balancer (3 Instances)**
+- **File**: `httpbin_server/docker-compose.nginx.yml`
+- **Features**: Nginx reverse proxy, 3 load-balanced httpbin instances, HTTP/HTTPS support without redirects
+- **Use case**: High-performance load balancing, simple configuration, dual protocol support
+- **Command**: `docker-compose -f httpbin_server/docker-compose.nginx.yml up -d`
+- **Endpoints**: `http://localhost/` and `https://localhost/`
+
+### 📊 Server Comparison
+
+| Feature | Simple HTTPBin | Traefik | Nginx |
+|:---|:---:|:---:|:---:|
+| Instances | 1 | 3 | 3 |
+| HTTP Support | ✅ | ✅ | ✅ |
+| HTTPS Support | ❌ | ✅ | ✅ |
+| Load Balancing | ❌ | ✅ | ✅ |
+| Health Checks | ❌ | ✅ | ✅ |
+| SSL/TLS Termination | ❌ | ✅ | ✅ |
+| Configuration Complexity | Low | High | Medium |
+| Resource Usage | Low | High | Medium |
+| Best For | Quick tests | Production-like | High-performance |
+
+### 🔍 Server Testing Examples
+
+#### **Testing Simple HTTPBin:**
+```bash
+# Test HTTP endpoint
+curl http://localhost/get
+
+# Quick benchmark (1 second)
+./.venv/bin/python -m http_benchmark.cli --url http://localhost/get --client requests --concurrency 1 --duration 1
+```
+
+#### **Testing Traefik Load Balancer:**
+```bash
+# Test HTTP endpoint
+curl http://localhost/get
+
+# Test HTTPS endpoint (self-signed cert)
+curl -k https://localhost/get
+
+# Quick benchmark with HTTP
+./.venv/bin/python -m http_benchmark.cli --url http://localhost/get --client requests --concurrency 1 --duration 1
+
+# Quick benchmark with HTTPS
+./.venv/bin/python -m http_benchmark.cli --url https://localhost/get --client requests --concurrency 1 --duration 1
+```
+
+#### **Testing Nginx Load Balancer:**
+```bash
+# Test HTTP endpoint
+curl http://localhost/get
+
+# Test HTTPS endpoint (self-signed cert)
+curl -k https://localhost/get
+
+# Quick benchmark with HTTP
+./.venv/bin/python -m http_benchmark.cli --url http://localhost/get --client httpx --concurrency 1 --duration 1
+
+# Quick benchmark with HTTPS
+./.venv/bin/python -m http_benchmark.cli --url https://localhost/get --client httpx --concurrency 1 --duration 1
+```
 
 ### ▶️ 2. Execute Benchmark
 Run a benchmark for a specific client:
 ```bash
-python -m http_benchmark.cli.main --url http://localhost/get --client httpx --concurrency 20 --duration 30
+python -m http_benchmark.cli --url http://localhost/get --client httpx --concurrency 20 --duration 30
 ```
 
 Compare multiple clients:
 ```bash
-python -m http_benchmark.cli.main --url http://localhost/get --compare requests httpx aiohttp --concurrency 10 --duration 10
+python -m http_benchmark.cli --url http://localhost/get --compare requests httpx aiohttp --concurrency 10 --duration 10
 ```
+
+### 🔗 Testing Different HTTP Methods
+The framework supports all standard HTTP methods: GET, POST, PUT, PATCH, and DELETE.
+
+#### Quick Tests (1 worker, 1 second)
+```bash
+# GET - Retrieve data
+python -m http_benchmark.cli --url http://localhost/get --method GET --client requests --concurrency 1 --duration 1
+
+# POST - Create resources
+python -m http_benchmark.cli --url http://localhost/post --method POST --client requests --concurrency 1 --duration 1 --body '{"key": "value"}'
+
+# PUT - Update resources
+python -m http_benchmark.cli --url http://localhost/put --method PUT --client requests --concurrency 1 --duration 1 --body '{"updated": "data"}'
+
+# PATCH - Partial updates
+python -m http_benchmark.cli --url http://localhost/patch --method PATCH --client requests --concurrency 1 --duration 1 --body '{"patched": "value"}'
+
+# DELETE - Remove resources
+python -m http_benchmark.cli --url http://localhost/delete --method DELETE --client requests --concurrency 1 --duration 1
+```
+
+## 🎯 Use Cases
+
+#### **Use Case 1: HTTP Client Selection**
+Compare different HTTP client libraries (requests, httpx, aiohttp, etc.) to find the best performer for your application.
+
+#### **Use Case 2: HTTP Method Optimization**
+Test GET, POST, PUT, PATCH, DELETE methods to identify performance characteristics and optimize API interactions.
+
+#### **Use Case 3: Server Configuration Comparison**
+Evaluate different server setups (simple, load-balanced, nginx vs traefik) to optimize infrastructure.
+
+#### **Use Case 4: Resource Usage Analysis**
+Monitor CPU, memory, and network I/O to make informed decisions about resource allocation.
 
 ## 🔧 Client Support
 

@@ -12,7 +12,7 @@ class TestCLIIntegration(unittest.TestCase):
         try:
             # Run the CLI with --help to check if it starts properly
             result = subprocess.run([
-                sys.executable, "-m", "http_benchmark.cli.main", "--help"
+                sys.executable, "-m", "http_benchmark.cli", "--help"
             ], capture_output=True, text=True, timeout=10)
             
             # The help command should succeed (return code 0) and have output
@@ -25,7 +25,7 @@ class TestCLIIntegration(unittest.TestCase):
             # For the purposes of this test, we'll consider it a pass if the module exists
             # and can be imported, even if the full CLI execution has issues
             try:
-                from http_benchmark.cli.main import main
+                from http_benchmark.cli import main
                 self.assertTrue(callable(main))
             except ImportError:
                 self.fail("CLI module cannot be imported")
@@ -33,8 +33,7 @@ class TestCLIIntegration(unittest.TestCase):
     def test_cli_module_imports(self):
         """Test that CLI module can be imported without errors."""
         try:
-            from http_benchmark.cli.main import main
-            from http_benchmark.cli.main import run_single_benchmark, compare_clients
+            from http_benchmark.cli import main, run_single_benchmark, compare_clients
             self.assertTrue(callable(main))
             self.assertTrue(callable(run_single_benchmark))
             self.assertTrue(callable(compare_clients))
@@ -44,19 +43,19 @@ class TestCLIIntegration(unittest.TestCase):
     def test_cli_argument_parsing_simulation(self):
         """Test CLI argument parsing logic by checking the main function structure."""
         # Import the CLI module to check its structure
-        from http_benchmark.cli.main import main
+        from http_benchmark.cli import main
         import argparse
         
         # We can't easily test the argument parser directly without mocking sys.argv,
         # but we can verify that the required components exist
         self.assertTrue(callable(main))
 
-    @patch('http_benchmark.cli.main.BenchmarkRunner')
-    @patch('http_benchmark.cli.main.BenchmarkConfiguration')
-    @patch('http_benchmark.cli.main.ResultStorage')
+    @patch('http_benchmark.cli.BenchmarkRunner')
+    @patch('http_benchmark.cli.BenchmarkConfiguration')
+    @patch('http_benchmark.cli.ResultStorage')
     def test_run_single_benchmark_mocked(self, mock_storage_class, mock_config_class, mock_runner_class):
         """Test run_single_benchmark function with mocked dependencies."""
-        from http_benchmark.cli.main import run_single_benchmark
+        from http_benchmark.cli import run_single_benchmark
         import argparse
         
         # Create a mock args object
@@ -70,6 +69,7 @@ class TestCLIIntegration(unittest.TestCase):
         mock_args.body = None
         mock_args.is_async = False
         mock_args.output = None
+        mock_args.verify_ssl = False
         
         # Mock the configuration
         mock_config = MagicMock()
@@ -92,6 +92,7 @@ class TestCLIIntegration(unittest.TestCase):
         mock_result.error_rate = 0.0
         mock_result.cpu_usage_avg = 15.0
         mock_result.memory_usage_avg = 50.0
+        mock_result.id = "test-id"
         mock_runner.run.return_value = mock_result
         mock_runner_class.return_value = mock_runner
         
@@ -108,12 +109,12 @@ class TestCLIIntegration(unittest.TestCase):
         mock_runner.run.assert_called_once()
         mock_storage.save_result.assert_called_once()
 
-    @patch('http_benchmark.cli.main.BenchmarkRunner')
-    @patch('http_benchmark.cli.main.BenchmarkConfiguration')
-    @patch('http_benchmark.cli.main.ResultStorage')
+    @patch('http_benchmark.cli.BenchmarkRunner')
+    @patch('http_benchmark.cli.BenchmarkConfiguration')
+    @patch('http_benchmark.cli.ResultStorage')
     def test_compare_clients_mocked(self, mock_storage_class, mock_config_class, mock_runner_class):
         """Test compare_clients function with mocked dependencies."""
-        from http_benchmark.cli.main import compare_clients
+        from http_benchmark.cli import compare_clients
         import argparse
         
         # Create a mock args object
@@ -124,6 +125,7 @@ class TestCLIIntegration(unittest.TestCase):
         mock_args.duration = 5
         mock_args.is_async = False
         mock_args.compare = ["httpx", "requests"]
+        mock_args.verify_ssl = False
         
         # Mock the configuration
         mock_config = MagicMock()
@@ -167,16 +169,15 @@ class TestCLIIntegration(unittest.TestCase):
 class TestCLIStructure(unittest.TestCase):
     def test_cli_module_structure(self):
         """Test the overall structure of the CLI module."""
-        import importlib.util
-        import http_benchmark.cli.main
+        import http_benchmark.cli
         
         # Check that the module has the expected functions
-        self.assertTrue(hasattr(http_benchmark.cli.main, 'main'))
-        self.assertTrue(hasattr(http_benchmark.cli.main, 'run_single_benchmark'))
-        self.assertTrue(hasattr(http_benchmark.cli.main, 'compare_clients'))
+        self.assertTrue(hasattr(http_benchmark.cli, 'main'))
+        self.assertTrue(hasattr(http_benchmark.cli, 'run_single_benchmark'))
+        self.assertTrue(hasattr(http_benchmark.cli, 'compare_clients'))
         
         # Check that main function is callable
-        self.assertTrue(callable(http_benchmark.cli.main.main))
+        self.assertTrue(callable(http_benchmark.cli.main))
 
 
 if __name__ == '__main__':

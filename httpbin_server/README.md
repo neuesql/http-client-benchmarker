@@ -129,10 +129,10 @@ This server setup is optimized for use with the `http-client-benchmarker` CLI.
 ### Example: Benchmarking against the Load Balancer
 ```bash
 # Benchmark httpx against the HTTP endpoint
-python -m http_benchmark.cli.main --url http://localhost/get --client httpx --concurrency 50 --duration 60
+python -m http_benchmark.cli --url http://localhost/get --client httpx --concurrency 50 --duration 60
 
 # Benchmark aiohttp against the HTTPS endpoint
-python -m http_benchmark.cli.main --url https://localhost/get --client aiohttp --concurrency 50 --duration 60 --async
+python -m http_benchmark.cli --url https://localhost/get --client aiohttp --concurrency 50 --duration 60 --async
 ```
 
 ### Recommended Setup for Performance Testing

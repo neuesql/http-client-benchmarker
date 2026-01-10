@@ -39,7 +39,7 @@ dev = [
 ]
 
 [project.scripts]
-http-benchmark = "http_benchmark.cli.main:main"
+http-benchmark = "http_benchmark.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
