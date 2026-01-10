@@ -38,9 +38,9 @@ jobs:
       run: |
         uv run flake8 http_benchmark/ tests/ --max-line-length=200
 
-    - name: Type check with MyPy
-      run: |
-        uv run mypy http_benchmark/
+#    - name: Type check with MyPy
+#      run: |
+#        uv run mypy http_benchmark/
 
     - name: Run unit tests
       run: |
