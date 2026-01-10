@@ -19,7 +19,7 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: production  # Use production environment for security
+    environment: PROD  # Use production environment for security
     
     steps:
     - name: Check if CI succeeded
