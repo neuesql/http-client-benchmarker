@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "http-benchmark-framework"
+name = "http-client-benchmarker"
 version = "0.1.0"
 description = "A Python HTTP Client Performance Benchmark Framework"
 readme = "README.md"
