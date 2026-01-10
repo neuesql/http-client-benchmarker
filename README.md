@@ -1,184 +1,181 @@
 # HTTP Client Performance Benchmark Framework
 
-A comprehensive Python framework for benchmarking HTTP client performance and resource usage across different libraries with detailed metrics and comparison capabilities.
+Technical framework for benchmarking and comparing Python HTTP client library performance. Supports synchronous and asynchronous execution models, providing metrics for throughput, latency, and system resource utilization.
 
-## Features
+## 🏗️ Architecture
 
-- **Multi-library Support**: Benchmark multiple HTTP client libraries including requests, requestx, httpx, aiohttp, urllib3, and pycurl
-- **Sync & Async Support**: Full support for both synchronous and asynchronous requests with performance comparison
-- **Resource Monitoring**: Detailed monitoring of CPU, memory, and network usage during benchmarking
-- **Flexible Configuration**: Configuration via pydantic-settings with environment variable support
-- **Result Storage**: Persistent storage of benchmark results in SQLite with comparison capabilities
-- **Command-Line Interface**: Full-featured CLI for easy benchmark execution and comparison
-- **Comprehensive Metrics**: Detailed performance metrics including response times, throughput, error rates, and percentiles
-- **Extensive Testing**: Complete test coverage with unit, integration, and performance tests
+The framework consists of a CLI/API entry point, an extensible adapter layer for HTTP clients, a resource monitoring system, and a persistence layer.
 
-## Installation
+### System Flow
 
-```bash
-# Using uv (recommended)
-uv venv
-uv pip install -e .
-
-# Or using pip
-pip install -e .
+```text
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   CLI/API       │    │   HTTP Client   │    │   HTTP Server   │
+│   Benchmark     │───▶│   (requests/    │───▶│   (httpbin)     │
+│   Config        │    │    httpx/etc)   │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                │                       │
+                                ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Console       │◀───│   Results       │◀───│   Response      │
+│   Output        │    │   Processing    │    │   Collection    │
+│                 │    │   (RPS, Latency│    │                 │
+└─────────────────┘    │   Error Rate)   │    └─────────────────┘
+                       └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   SQLite DB     │
+                       │   Storage       │
+                       └─────────────────┘
 ```
 
-## Usage
+The benchmark framework compares HTTP client performance by measuring response times, throughput, and resource usage to help choose optimal client libraries.
 
-### Command Line Interface
+## 🚀 Installation
 
-```bash
-# Basic benchmark with specific client
-python -m http_benchmark.cli.main --url https://httpbin.org/get --client httpx --concurrency 10 --duration 30
+### 📋 Prerequisites
+- Python 3.12+
+- Docker and Docker Compose (for test server)
 
-# Compare multiple clients
-python -m http_benchmark.cli.main --url https://httpbin.org/get --compare requests httpx aiohttp --concurrency 5 --duration 20
-
-# Advanced benchmark with custom parameters
-python -m http_benchmark.cli.main --url https://api.example.com/data --client httpx --method POST --concurrency 20 --duration 60 --headers '{"Content-Type": "application/json"}'
-
-# Async benchmarking
-python -m http_benchmark.cli.main --url https://httpbin.org/get --client httpx --async --concurrency 10
-```
-
-
-```bash
-# Basic benchmark with specific client
-python -m http_benchmark.cli.main --url http://localhost/get --client httpx --concurrency 10 --duration 30
-
-# Compare multiple clients
-python -m http_benchmark.cli.main --url http://localhost/get --compare requests aiohttp pycurl urllib3 httpx --concurrency 1 --duration 2
-
-# Advanced benchmark with custom parameters
-python -m http_benchmark.cli.main --url http://localhost/data --client httpx --method POST --concurrency 20 --duration 60 --headers '{"Content-Type": "application/json"}'
-
-# Async benchmarking
-python -m http_benchmark.cli.main --url http://localhost/get --client httpx --async --method GET --concurrency 10
-```
-
-
-
-### Python API
-
-```python
-from http_benchmark.benchmark import BenchmarkRunner
-from http_benchmark.config import BenchmarkConfiguration
-
-# Create a detailed configuration
-config = BenchmarkConfiguration(
-    target_url="https://httpbin.org/get",
-    http_method="GET",
-    headers={"User-Agent": "Benchmark-Client/1.0"},
-    concurrency=10,
-    duration_seconds=30,
-    client_library="httpx",
-    is_async=False,
-    timeout=30
-)
-
-# Run the benchmark
-runner = BenchmarkRunner(config)
-result = runner.run()
-
-# Access detailed metrics
-print(f"Client Library: {result.client_library}")
-print(f"Requests per second: {result.requests_per_second}")
-print(f"Average response time: {result.avg_response_time:.3f}s")
-print(f"95th percentile: {result.p95_response_time:.3f}s")
-print(f"99th percentile: {result.p99_response_time:.3f}s")
-print(f"Error rate: {result.error_rate:.2f}%")
-print(f"CPU usage (avg): {result.cpu_usage_avg:.2f}%")
-print(f"Memory usage (avg): {result.memory_usage_avg:.2f}MB")
-```
-
-
-### Result Storage and Comparison
-
-```python
-from http_benchmark.storage import ResultStorage
-
-# Store results
-storage = ResultStorage()
-storage.save_result(result)
-
-# Retrieve and compare results
-all_results = storage.get_all_results()
-comparison = storage.compare_results([result1.id, result2.id, result3.id])
-
-for comparison_item in comparison:
-    print(f"Client: {comparison_item['client_library']}")
-    print(f"RPS: {comparison_item['requests_per_second']}")
-    print(f"Avg Time: {comparison_item['avg_response_time']:.3f}s")
-    print(f"CPU: {comparison_item['cpu_usage_avg']:.2f}%")
-```
-
-## Supported HTTP Client Libraries
-
-- `requests` - Synchronous HTTP requests with extensive ecosystem
-- `requestx` - Enhanced HTTP client with additional features and performance optimizations
-- `httpx` - Modern HTTP client supporting both synchronous and asynchronous requests
-- `aiohttp` - Asynchronous HTTP client built on asyncio
-- `urllib3` - Low-level HTTP client with connection pooling and other advanced features
-- `pycurl` - High-performance HTTP client based on libcurl
-
-## Configuration Options
-
-The framework uses pydantic-settings for configuration. You can configure via:
-
-1. **Environment variables**: Prefix with `HTTP_BENCHMARK_`
+### 🔧 Setup
+1. Clone the repository:
    ```bash
-   export HTTP_BENCHMARK_DEFAULT_CONCURRENCY=20
-   export HTTP_BENCHMARK_MAX_CONCURRENCY=10000
+   git clone https://github.com/your-repo/http-client-benchmarker.git
+   cd http-client-benchmarker
    ```
 
-2. **Configuration file**: Create a `.env` file with settings
+2. Install dependencies using `uv` (recommended):
+   ```bash
+   uv venv
+   source .venv/bin/activate
+   uv pip install -e ".[dev]"
+   ```
+   Or using `pip`:
+   ```bash
+   pip install -e ".[dev]"
+   ```
 
-3. **Code-based configuration**: Using the BenchmarkConfiguration class
+## ⚡ Quick Start
 
-### Available Configuration Settings
+### 🖥️ 1. Start Test Server
+Select a server configuration:
+- **Load Balanced (Recommended)**: Traefik + 3 httpbin instances
+  ```bash
+  docker-compose -f httpbin_server/docker-compose.yml up -d
+  ```
+- **Simple**: Single httpbin instance
+  ```bash
+  docker-compose -f httpbin_server/docker-compose.simple.yml up -d
+  ```
 
-- `default_concurrency`: Default number of concurrent requests (default: 10)
-- `default_duration_seconds`: Default benchmark duration (default: 30)
-- `max_concurrency`: Maximum allowed concurrency (default: 10000)
-- `resource_monitoring_interval`: Interval for resource monitoring (default: 0.1s)
-- `sqlite_db_path`: Path to SQLite database (default: "benchmark_results.db")
-
-## Metrics Collected
-
-The framework collects comprehensive performance metrics:
-
-- **Throughput**: Requests per second (RPS)
-- **Response Times**: Average, minimum, maximum, 95th percentile, 99th percentile
-- **Error Rates**: Percentage of failed requests
-- **Resource Usage**: CPU, memory, and network I/O
-- **HTTP Details**: Status codes, headers, response sizes
-
-## Testing
-
-The framework includes comprehensive test coverage:
-
+### ▶️ 2. Execute Benchmark
+Run a benchmark for a specific client:
 ```bash
-# Run all tests
-python -m unittest discover tests/
-
-# Run specific test suites
-python -m unittest tests.unit.test_models
-python -m unittest tests.integration.test_end_to_end
-python -m unittest tests.performance.test_accuracy
+python -m http_benchmark.cli.main --url http://localhost/get --client httpx --concurrency 20 --duration 30
 ```
 
-## Architecture
+Compare multiple clients:
+```bash
+python -m http_benchmark.cli.main --url http://localhost/get --compare requests httpx aiohttp --concurrency 10 --duration 10
+```
 
-The framework follows a clean architecture with distinct layers:
+## 🔧 Client Support
 
-- **Models**: Data models for benchmark results, configurations, and metrics
-- **Clients**: Adapters for different HTTP client libraries
-- **Benchmark**: Core benchmarking logic with sync/async support
-- **Storage**: SQLite-based result storage and retrieval
-- **CLI**: Command-line interface
-- **Utils**: Utilities for logging, resource monitoring, and configuration
+| Library | Sync | Async | Key Characteristics |
+|:---|:---:|:---:|:---|
+| `aiohttp` | ❌ | ✅ | 🎯 Non-blocking I/O, optimized for async services |
+| `httpx` | ✅ | ✅ | 🎯 HTTP/2 support, requests-compatible API |
+| `pycurl` | ✅ | ❌ | 🎯 libcurl bindings, minimal overhead |
+| `requests` | ✅ | ❌ | 🎯 Standard synchronous client, blocking I/O |
+| `requestx` | ✅ | ✅ | 🎯 Performance-optimized dual-mode client |
+| `urllib3` | ✅ | ❌ | 🎯 Thread-safe connection pooling, low-level |
 
-## License
+## ⚙️ Configuration
 
-MIT
+Configuration is managed via `pydantic-settings`. Environment variables use the `HTTP_BENCHMARK_` prefix.
+
+| 📊 Environment Variable | Default | Description |
+|:---|:---|:---|
+| `HTTP_BENCHMARK_DEFAULT_CONCURRENCY` | `10` | Default concurrent workers |
+| `HTTP_BENCHMARK_DEFAULT_DURATION_SECONDS` | `30` | Default benchmark duration (seconds) |
+| `HTTP_BENCHMARK_MAX_CONCURRENCY` | `10000` | Safety limit for concurrency |
+| `HTTP_BENCHMARK_SQLITE_DB_PATH` | `benchmark_results.db` | SQLite storage path |
+| `HTTP_BENCHMARK_RESOURCE_MONITORING_INTERVAL` | `0.1` | Metrics polling interval (seconds) |
+
+## 💾 Database Schema
+
+Results are persisted in the `benchmark_results` table.
+
+### 📋 Table Structure
+
+| Field | Type | Description |
+|:---|:---|:---|
+| `id` | TEXT | Primary key (UUID) |
+| `name` | TEXT | Benchmark run identifier |
+| `client_library` | TEXT | Library name (e.g., "httpx") |
+| `client_type` | TEXT | Execution model ("sync" or "async") |
+| `http_method` | TEXT | HTTP method utilized |
+| `url` | TEXT | Target URL |
+| `start_time` | TEXT | Start timestamp (ISO) |
+| `end_time` | TEXT | End timestamp (ISO) |
+| `duration` | REAL | Total execution time (seconds) |
+| `requests_count` | INTEGER | Total requests completed |
+| `requests_per_second` | REAL | Average throughput |
+| `avg_response_time` | REAL | Mean latency (seconds) |
+| `p95_response_time` | REAL | 95th percentile latency |
+| `p99_response_time` | REAL | 99th percentile latency |
+| `cpu_usage_avg` | REAL | Average CPU usage (%) |
+| `memory_usage_avg` | REAL | Average RSS memory (MB) |
+| `error_count` | INTEGER | Total failed requests |
+| `error_rate` | REAL | Failure percentage |
+| `concurrency_level` | INTEGER | Configured concurrency |
+| `config_snapshot` | TEXT | JSON snapshot of configuration |
+| `created_at` | TEXT | Record creation timestamp |
+
+### 🔍 Sample Queries
+```sql
+-- Get average RPS and latency per client library
+SELECT 
+    client_library, 
+    AVG(requests_per_second) as avg_rps, 
+    AVG(avg_response_time) * 1000 as avg_latency_ms 
+FROM benchmark_results 
+GROUP BY client_library;
+```
+
+## 🧪 Development
+
+### ✅ Testing
+Execute the following commands to run the test suites:
+```bash
+# Unit tests
+python -m unittest discover tests/unit
+
+# Integration tests
+python -m unittest discover tests/integration
+
+# Performance tests
+python -m unittest discover tests/performance
+```
+
+### 🎨 Linting and Formatting
+```bash
+# Code formatting
+black http_benchmark/ tests/
+
+# Linting
+flake8 http_benchmark/ tests/
+```
+
+## 🏗️ Architecture Details
+
+### 🔌 Adapter Pattern
+Standardizes interactions with diverse HTTP libraries. Each adapter implements a unified interface, decoupling the core `BenchmarkRunner` from library-specific implementations.
+
+### 📊 Resource Monitoring
+Background execution via `psutil` captures system metrics (CPU, Memory, Network I/O) without blocking primary benchmark operations.
+
+### ⚡ Concurrency Management
+Uses `ThreadPoolExecutor` for synchronous clients and `asyncio` tasks for asynchronous clients to maintain constant concurrency levels throughout the benchmark duration.

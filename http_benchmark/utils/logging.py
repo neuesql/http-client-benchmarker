@@ -18,7 +18,7 @@ def setup_logging():
     
     # Add file handler for detailed logs
     logger.add(
-        "logs/benchmark_framework.log",
+        "benchmark_framework.log",
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
         level="DEBUG",
         rotation="10 MB",
