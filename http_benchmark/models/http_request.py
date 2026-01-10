@@ -7,7 +7,7 @@ from .base import BaseModel
 
 class HTTPRequest(BaseModel):
     """Represents an HTTP request with method, URL, headers, and body for benchmarking."""
-    
+
     def __init__(
         self,
         method: str,
@@ -16,7 +16,7 @@ class HTTPRequest(BaseModel):
         body: Optional[str] = None,
         timeout: int = 30,
         verify_ssl: bool = True,
-        id: Optional[str] = None
+        id: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid4())
         self.method = method

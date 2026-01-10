@@ -7,7 +7,7 @@ from .base import BaseModel
 
 class BenchmarkConfiguration(BaseModel):
     """Holds configurable parameters for benchmark execution."""
-    
+
     def __init__(
         self,
         target_url: str,
@@ -24,7 +24,7 @@ class BenchmarkConfiguration(BaseModel):
         retry_attempts: int = 3,
         delay_between_requests: float = 0.0,
         name: Optional[str] = None,
-        id: Optional[str] = None
+        id: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid4())
         self.name = name or f"Benchmark config for {target_url}"

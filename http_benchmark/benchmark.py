@@ -109,7 +109,9 @@ class BenchmarkRunner:
         )
         return benchmark_result
 
-    def _run_sync_benchmark(self, adapter_class, http_request: HTTPRequest) -> Dict[str, Any]:
+    def _run_sync_benchmark(
+        self, adapter_class, http_request: HTTPRequest
+    ) -> Dict[str, Any]:
         """Run a synchronous benchmark."""
         app_logger.info("Running synchronous benchmark")
 
@@ -118,7 +120,9 @@ class BenchmarkRunner:
         with adapter:
             return self._execute_sync_benchmark(adapter, http_request)
 
-    def _execute_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
+    def _execute_sync_benchmark(
+        self, adapter, http_request: HTTPRequest
+    ) -> Dict[str, Any]:
 
         response_times = []
         error_count = 0

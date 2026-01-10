@@ -8,7 +8,7 @@ from .base import BaseModel
 
 class ResourceMetrics(BaseModel):
     """Captures system resource usage during benchmark execution."""
-    
+
     def __init__(
         self,
         benchmark_id: str,
@@ -19,7 +19,7 @@ class ResourceMetrics(BaseModel):
         bytes_received: int,
         disk_read_mb: float = 0.0,
         disk_write_mb: float = 0.0,
-        id: Optional[str] = None
+        id: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid4())
         self.benchmark_id = benchmark_id

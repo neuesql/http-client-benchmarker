@@ -27,13 +27,13 @@ class TestBenchmarkResult(unittest.TestCase):
             p99_response_time=0.18,
             cpu_usage_avg=25.0,
             memory_usage_avg=100.0,
-            network_io={'bytes_sent': 1000, 'bytes_recv': 2000},
+            network_io={"bytes_sent": 1000, "bytes_recv": 2000},
             error_count=0,
             error_rate=0.0,
             concurrency_level=5,
-            config_snapshot={}
+            config_snapshot={},
         )
-        
+
         self.assertEqual(result.name, "Test Benchmark")
         self.assertEqual(result.client_library, "requests")
         self.assertEqual(result.client_type, "sync")
@@ -61,19 +61,19 @@ class TestBenchmarkResult(unittest.TestCase):
             p99_response_time=0.18,
             cpu_usage_avg=25.0,
             memory_usage_avg=100.0,
-            network_io={'bytes_sent': 1000, 'bytes_recv': 2000},
+            network_io={"bytes_sent": 1000, "bytes_recv": 2000},
             error_count=0,
             error_rate=0.0,
             concurrency_level=5,
-            config_snapshot={}
+            config_snapshot={},
         )
-        
+
         result_dict = result.to_dict()
-        self.assertIn('name', result_dict)
-        self.assertIn('client_library', result_dict)
-        self.assertIn('client_type', result_dict)
-        self.assertEqual(result_dict['client_library'], 'requests')
-        self.assertEqual(result_dict['client_type'], 'sync')
+        self.assertIn("name", result_dict)
+        self.assertIn("client_library", result_dict)
+        self.assertIn("client_type", result_dict)
+        self.assertEqual(result_dict["client_library"], "requests")
+        self.assertEqual(result_dict["client_type"], "sync")
 
 
 class TestBenchmarkConfiguration(unittest.TestCase):
@@ -84,9 +84,9 @@ class TestBenchmarkConfiguration(unittest.TestCase):
             http_method="POST",
             concurrency=10,
             duration_seconds=30,
-            client_library="httpx"
+            client_library="httpx",
         )
-        
+
         self.assertEqual(config.target_url, "https://example.com")
         self.assertEqual(config.http_method, "POST")
         self.assertEqual(config.concurrency, 10)
@@ -95,13 +95,11 @@ class TestBenchmarkConfiguration(unittest.TestCase):
 
     def test_default_values(self):
         """Test default values for BenchmarkConfiguration."""
-        config = BenchmarkConfiguration(
-            target_url="https://example.com"
-        )
-        
+        config = BenchmarkConfiguration(target_url="https://example.com")
+
         self.assertEqual(config.http_method, "GET")  # Default value
-        self.assertEqual(config.concurrency, 10)      # Default value
-        self.assertEqual(config.duration_seconds, 30) # Default value
+        self.assertEqual(config.concurrency, 10)  # Default value
+        self.assertEqual(config.duration_seconds, 30)  # Default value
         self.assertEqual(config.client_library, "requests")  # Default value
 
 
@@ -113,9 +111,9 @@ class TestHTTPRequest(unittest.TestCase):
             url="https://example.com/api",
             headers={"Content-Type": "application/json"},
             body='{"test": "data"}',
-            timeout=30
+            timeout=30,
         )
-        
+
         self.assertEqual(request.method, "POST")
         self.assertEqual(request.url, "https://example.com/api")
         self.assertEqual(request.headers["Content-Type"], "application/json")
@@ -124,14 +122,11 @@ class TestHTTPRequest(unittest.TestCase):
 
     def test_default_values(self):
         """Test default values for HTTPRequest."""
-        request = HTTPRequest(
-            method="GET",
-            url="https://example.com"
-        )
-        
+        request = HTTPRequest(method="GET", url="https://example.com")
+
         self.assertEqual(request.method, "GET")
         self.assertEqual(request.headers, {})  # Default empty dict
-        self.assertEqual(request.body, "")     # Default empty string
+        self.assertEqual(request.body, "")  # Default empty string
         self.assertEqual(request.timeout, 30)  # Default value
 
 
@@ -147,9 +142,9 @@ class TestResourceMetrics(unittest.TestCase):
             bytes_sent=1000,
             bytes_received=2000,
             disk_read_mb=1.5,
-            disk_write_mb=0.5
+            disk_write_mb=0.5,
         )
-        
+
         self.assertEqual(metrics.benchmark_id, "test-benchmark-123")
         self.assertEqual(metrics.cpu_percent, 25.5)
         self.assertEqual(metrics.memory_mb, 100.0)
@@ -157,5 +152,5 @@ class TestResourceMetrics(unittest.TestCase):
         self.assertEqual(metrics.disk_read_mb, 1.5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

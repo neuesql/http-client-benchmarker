@@ -8,7 +8,7 @@ from .base import BaseModel
 
 class BenchmarkResult(BaseModel):
     """Contains performance metrics from a single benchmark run."""
-    
+
     def __init__(
         self,
         name: str,
@@ -33,7 +33,7 @@ class BenchmarkResult(BaseModel):
         error_rate: float,
         concurrency_level: int,
         config_snapshot: Dict[str, Any],
-        id: Optional[str] = None
+        id: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid4())
         self.name = name

@@ -9,7 +9,7 @@ from datetime import datetime
 class TestResultStorage(unittest.TestCase):
     def setUp(self):
         """Set up test database in a temporary location."""
-        self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+        self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
         self.temp_db.close()
         self.storage = ResultStorage(db_path=self.temp_db.name)
 
@@ -44,16 +44,16 @@ class TestResultStorage(unittest.TestCase):
             p99_response_time=0.18,
             cpu_usage_avg=25.0,
             memory_usage_avg=100.0,
-            network_io={'bytes_sent': 1000, 'bytes_recv': 2000},
+            network_io={"bytes_sent": 1000, "bytes_recv": 2000},
             error_count=0,
             error_rate=0.0,
             concurrency_level=5,
-            config_snapshot={}
+            config_snapshot={},
         )
-        
+
         # Save the result
         self.storage.save_result(result)
-        
+
         # Verify it was saved by retrieving it
         retrieved_result = self.storage.get_result_by_id(result.id)
         self.assertIsNotNone(retrieved_result)
@@ -82,17 +82,17 @@ class TestResultStorage(unittest.TestCase):
             p99_response_time=0.09,
             cpu_usage_avg=30.0,
             memory_usage_avg=150.0,
-            network_io={'bytes_sent': 500, 'bytes_recv': 1000},
+            network_io={"bytes_sent": 500, "bytes_recv": 1000},
             error_count=0,
             error_rate=0.0,
             concurrency_level=3,
-            config_snapshot={}
+            config_snapshot={},
         )
-        
+
         # Save and retrieve
         self.storage.save_result(result)
         retrieved = self.storage.get_result_by_id(result.id)
-        
+
         self.assertIsNotNone(retrieved)
         self.assertEqual(retrieved.id, result.id)
         self.assertEqual(retrieved.name, "Test Get By ID")
@@ -120,17 +120,17 @@ class TestResultStorage(unittest.TestCase):
                 p99_response_time=0.18,
                 cpu_usage_avg=25.0,
                 memory_usage_avg=100.0,
-                network_io={'bytes_sent': 100, 'bytes_recv': 200},
+                network_io={"bytes_sent": 100, "bytes_recv": 200},
                 error_count=0,
                 error_rate=0.0,
                 concurrency_level=2,
-                config_snapshot={}
+                config_snapshot={},
             )
             self.storage.save_result(result)
-        
+
         # Retrieve results by name
         results = self.storage.get_results_by_name(name)
-        
+
         self.assertEqual(len(results), 3)
         for result in results:
             self.assertEqual(result.name, name)
@@ -157,17 +157,17 @@ class TestResultStorage(unittest.TestCase):
                 p99_response_time=0.18,
                 cpu_usage_avg=25.0,
                 memory_usage_avg=100.0,
-                network_io={'bytes_sent': 100, 'bytes_recv': 200},
+                network_io={"bytes_sent": 100, "bytes_recv": 200},
                 error_count=0,
                 error_rate=0.0,
                 concurrency_level=2,
-                config_snapshot={}
+                config_snapshot={},
             )
             self.storage.save_result(result)
-        
+
         # Retrieve all results
         all_results = self.storage.get_all_results()
-        
+
         self.assertGreaterEqual(len(all_results), 2)
         # Results should be ordered by created_at DESC (most recent first)
         if len(all_results) >= 2:
@@ -180,7 +180,7 @@ class TestResultStorage(unittest.TestCase):
         # Create and save multiple results with different client libraries
         clients = ["requests", "httpx", "aiohttp"]
         results = []
-        
+
         for client in clients:
             result = BenchmarkResult(
                 name="Comparison Test",
@@ -200,62 +200,86 @@ class TestResultStorage(unittest.TestCase):
                 p99_response_time=0.18,
                 cpu_usage_avg=25.0,
                 memory_usage_avg=100.0,
-                network_io={'bytes_sent': 100, 'bytes_recv': 200},
+                network_io={"bytes_sent": 100, "bytes_recv": 200},
                 error_count=0,
                 error_rate=0.0,
                 concurrency_level=5,
-                config_snapshot={}
+                config_snapshot={},
             )
             self.storage.save_result(result)
             results.append(result)
-        
+
         # Get the IDs to compare
         result_ids = [r.id for r in results]
-        
+
         # Compare the results
         comparison = self.storage.compare_results(result_ids)
-        
+
         self.assertEqual(len(comparison), 3)
         for comparison_item in comparison:
-            self.assertIn('id', comparison_item)
-            self.assertIn('client_library', comparison_item)
-            self.assertIn('requests_per_second', comparison_item)
-            self.assertIn('avg_response_time', comparison_item)
-            self.assertIn('error_rate', comparison_item)
-            self.assertIn('cpu_usage_avg', comparison_item)
-            self.assertIn('memory_usage_avg', comparison_item)
+            self.assertIn("id", comparison_item)
+            self.assertIn("client_library", comparison_item)
+            self.assertIn("requests_per_second", comparison_item)
+            self.assertIn("avg_response_time", comparison_item)
+            self.assertIn("error_rate", comparison_item)
+            self.assertIn("cpu_usage_avg", comparison_item)
+            self.assertIn("memory_usage_avg", comparison_item)
 
     def test_database_schema(self):
         """Test that the database schema is correctly created."""
         import sqlite3
-        
+
         conn = sqlite3.connect(self.temp_db.name)
         cursor = conn.cursor()
-        
+
         # Check if the table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='benchmark_results';")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='benchmark_results';"
+        )
         table_exists = cursor.fetchone()
         self.assertIsNotNone(table_exists, "benchmark_results table should exist")
-        
+
         # Check the table structure
         cursor.execute("PRAGMA table_info(benchmark_results);")
         columns = cursor.fetchall()
-        
+
         column_names = [col[1] for col in columns]
         expected_columns = [
-            'id', 'name', 'client_library', 'client_type', 'http_method', 'url', 'start_time', 
-            'end_time', 'duration', 'requests_count', 'requests_per_second', 
-            'avg_response_time', 'min_response_time', 'max_response_time', 
-            'p95_response_time', 'p99_response_time', 'cpu_usage_avg', 
-            'memory_usage_avg', 'network_io', 'error_count', 'error_rate', 
-            'concurrency_level', 'config_snapshot', 'created_at'
+            "id",
+            "name",
+            "client_library",
+            "client_type",
+            "http_method",
+            "url",
+            "start_time",
+            "end_time",
+            "duration",
+            "requests_count",
+            "requests_per_second",
+            "avg_response_time",
+            "min_response_time",
+            "max_response_time",
+            "p95_response_time",
+            "p99_response_time",
+            "cpu_usage_avg",
+            "memory_usage_avg",
+            "network_io",
+            "error_count",
+            "error_rate",
+            "concurrency_level",
+            "config_snapshot",
+            "created_at",
         ]
-        
+
         for col in expected_columns:
-            self.assertIn(col, column_names, f"Column {col} should exist in benchmark_results table")
-        
+            self.assertIn(
+                col,
+                column_names,
+                f"Column {col} should exist in benchmark_results table",
+            )
+
         conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

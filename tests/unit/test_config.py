@@ -15,12 +15,28 @@ class TestConfiguration(unittest.TestCase):
 
     def test_supported_libraries(self):
         """Test that all required HTTP client libraries are supported."""
-        expected_libraries = ["requests", "requestx", "httpx", "aiohttp", "urllib3", "pycurl"]
+        expected_libraries = [
+            "requests",
+            "requestx",
+            "httpx",
+            "aiohttp",
+            "urllib3",
+            "pycurl",
+        ]
         self.assertEqual(settings.supported_client_libraries, expected_libraries)
 
     def test_supported_http_methods(self):
         """Test that all required HTTP methods are supported."""
-        expected_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "STREAM"]
+        expected_methods = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "HEAD",
+            "OPTIONS",
+            "STREAM",
+        ]
         self.assertEqual(settings.supported_http_methods, expected_methods)
 
     def test_monitoring_settings(self):
@@ -31,5 +47,5 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(settings.resource_monitoring_interval, 0.1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

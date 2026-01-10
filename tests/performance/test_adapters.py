@@ -290,5 +290,6 @@ class TestLocalhostAdapters(unittest.TestCase):
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -21,9 +21,7 @@ class Urllib3Adapter(BaseHTTPAdapter):
         """Initialize pool managers when entering sync context."""
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.pool = urllib3.PoolManager()
-        self.pool_no_verify = urllib3.PoolManager(
-            cert_reqs="CERT_NONE"
-        )
+        self.pool_no_verify = urllib3.PoolManager(cert_reqs="CERT_NONE")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

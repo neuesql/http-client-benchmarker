@@ -39,7 +39,9 @@ class TestLocalhostPerformance(unittest.TestCase):
         table_data = []
 
         print("\n" + "=" * 80)
-        print(f"HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - {'HTTPS' if is_https else 'HTTP'})")
+        print(
+            f"HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - {'HTTPS' if is_https else 'HTTP'})"
+        )
         print("=" * 80)
 
         for client in client_libraries:
