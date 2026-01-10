@@ -86,6 +86,33 @@ def main():
         print("✅ uv.lock regenerated")
     else:
         print("⚠️ Failed to regenerate uv.lock")
+    
+    print("\n📁 Adding files to git...")
+    git_add_result = subprocess.run(["git", "add", "."], capture_output=True, text=True)
+    if git_add_result.returncode == 0:
+        print("✅ Files added to git")
+    else:
+        print(f"⚠️ Failed to add files: {git_add_result.stderr}")
+        return
+    
+    print("\n📝 Committing changes...")
+    commit_message = f"bump: version {current_version} → {new_version}"
+    git_commit_result = subprocess.run(["git", "commit", "-m", commit_message], capture_output=True, text=True)
+    if git_commit_result.returncode == 0:
+        print(f"✅ Changes committed: {commit_message}")
+    else:
+        print(f"⚠️ Failed to commit: {git_commit_result.stderr}")
+        return
+    
+    print("\n🚀 Pushing to GitHub...")
+    git_push_result = subprocess.run(["git", "push", "origin", "main"], capture_output=True, text=True)
+    if git_push_result.returncode == 0:
+        print("✅ Changes pushed to GitHub")
+    else:
+        print(f"⚠️ Failed to push: {git_push_result.stderr}")
+        print("You may need to push manually: git push origin main")
+    
+    print(f"\n🎉 Version bump complete! Version is now {new_version}")
 
 if __name__ == "__main__":
     main()
