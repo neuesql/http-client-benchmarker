@@ -6,8 +6,6 @@ on:
     types:
       - completed
     branches: [main]
-    # Only run when CI succeeds
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
   workflow_dispatch:  # Allow manual triggering
     inputs:
       version:
@@ -24,6 +22,18 @@ jobs:
     environment: production  # Use production environment for security
     
     steps:
+    - name: Check if CI succeeded
+      id: check-ci
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "❌ CI workflow did not succeed. Skipping release."
+            exit 0
+          fi
+        fi
+        echo "✅ Proceeding with release"
+        echo "run_release=true" >> $GITHUB_OUTPUT
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
