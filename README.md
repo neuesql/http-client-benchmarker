@@ -3,13 +3,13 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance technical framework for benchmarking and comparing Python HTTP client libraries. Make data-driven decisions with precision metrics on throughput, latency, and system resource utilization across both synchronous and asynchronous execution models.
-
 ---
 
-## 🌟 Motivation & Purpose
+## 🚀 Introduction
 
 **Stop guessing, start measuring.** 🚀
+
+A high-performance technical framework for benchmarking and comparing Python HTTP client libraries. Make data-driven decisions with precision metrics on throughput, latency, and system resource utilization across both synchronous and asynchronous execution models.
 
 In the world of high-performance Python services, choosing the right HTTP client can be the difference between a snappy API and a bottleneck. This framework empowers developers to evaluate HTTP clients and servers under real-world conditions—streaming, heavy POST payloads, or rapid-fire GET requests.
 
@@ -274,7 +274,7 @@ Keep the core stable with our comprehensive test suite:
 ### 🎨 Linting & Formatting
 ```bash
 # Code formatting
-black http_benchmark/
+black http_benchmark/ tests/ --line-length 250
 
 # Linting
 flake8 http_benchmark/ --max-line-length=250
