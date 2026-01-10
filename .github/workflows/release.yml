@@ -51,11 +51,13 @@ jobs:
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
+        tag_name: release-${{ github.run_id }}
+        name: Release ${{ github.run_id }}
         body: |
-          ## 🚀 HTTP Client Benchmarker v${{ github.ref_name }}
+          ## 🚀 HTTP Client Benchmarker Release
           
           **⚡ Performance benchmarking for your HTTP stack**
           
@@ -63,16 +65,17 @@ jobs:
           
           ### 📦 Package Details
           - **Package**: http-client-benchmarker
-          - **Version**: ${{ github.ref_name }}
+          - **Version**: ${{ github.run_id }}
           - **Python**: 3.12+
+          - **Run ID**: ${{ github.run_id }}
           
           ### 🔧 Installation
           ```bash
-          pip install http-client-benchmarker==${{ github.ref_name }}
+          pip install http-client-benchmarker
           ```
           
           ### 🆕 What's New
-          See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+          See commit history for detailed changes.
           
           ### 🐛 Bug Reports
           Please report issues at: https://github.com/${{ github.repository }}/issues
