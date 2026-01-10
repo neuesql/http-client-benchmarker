@@ -1,4 +1,4 @@
-# ⚡ HTTP Client Performance Benchmark Framework
+# ⚡ HTTP Client & Server Performance Benchmark Framework
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,67 +7,67 @@
 
 ## 🚀 Introduction
 
-**Stop guessing, start measuring.** Make data-driven decisions about your HTTP stack with precision benchmarking.
+**Stop guessing. Start measuring.** 🎯 Engineering decisions should be backed by hard data, not hunches. Make data-driven choices for your HTTP stack with precision, high-concurrency benchmarking.
 
-In the world of high-performance Python services, the right combination of HTTP client, server infrastructure, and request methods can make or break your application's performance. This framework eliminates the guesswork by providing comprehensive, real-world benchmarks across your entire HTTP stack.
+In the high-stakes world of performance-critical services, your choice of HTTP client, server infrastructure, and request handling isn't just a detail—it's the backbone of your application's scalability. This framework eliminates the guesswork by providing comprehensive, real-world benchmarks across your entire HTTP ecosystem.
 
 ### 🎯 Why This Framework?
 
-Traditional benchmarking tools focus on a single dimension—either the client OR the server. We take a holistic approach, enabling you to optimize **three critical dimensions** of your HTTP infrastructure:
+Most benchmarking tools are myopic, focusing on either just the client or just the server. We take a holistic, **multi-dimensional approach** to help you optimize the three critical pillars of your HTTP infrastructure:
 
 #### 🔧 **1. HTTP Client Selection** — *Choose Your Weapon*
-Pick the perfect client library for your workload. Should you migrate from `requests` to `httpx`? Is `aiohttp` worth the async complexity? Get concrete answers.
+Find the perfect library for your specific workload. Should you stick with the classic `requests`? Is `httpx` worth the upgrade for HTTP/2? Does `aiohttp` live up to the async hype? Get the numbers, not the hype.
 
-**Available Clients:**
-- 🐍 **`requests`** — The battle-tested synchronous standard
-- ⚡ **`httpx`** — Modern HTTP/1.1 and HTTP/2 with sync/async modes
-- 🌊 **`aiohttp`** — Pure async powerhouse for non-blocking I/O
-- 🔗 **`pycurl`** — Low-level libcurl bindings for minimal overhead
-- 🚄 **`requestx`** — Performance-optimized dual-mode client
-- 🔌 **`urllib3`** — Thread-safe connection pooling at the foundation layer
+**Available Arsenal:**
+- 🐍 **`requests`** — The battle-tested industry standard
+- ⚡ **`httpx`** — Modern, feature-rich HTTP/1.1 & HTTP/2 with sync/async flexibility
+- 🌊 **`aiohttp`** — The high-performance async engine for non-blocking I/O
+- 🔗 **`pycurl`** — Blazing fast C-level bindings via libcurl
+- 🚄 **`requestx`** — Performance-tuned dual-mode execution
+- 🔌 **`urllib3`** — Rock-solid connection pooling at the core
 
 #### 🏗️ **2. Server Infrastructure** — *Build Your Battlefield*
-Test against production-realistic environments. Compare reverse proxies, load balancers, and server configurations to find your infrastructure sweet spot.
+Don't test in a vacuum. Benchmark against production-grade environments. Compare how different reverse proxies and load balancers handle the heat.
 
-**Available Servers:**
-- 🎈 **Simple HTTPBin** — Lightweight single-instance for quick validation
-- 🎪 **Traefik Load Balancer** — Cloud-native proxy with 3 backend instances
-- 🚀 **Nginx Load Balancer** — Battle-hardened reverse proxy with superior throughput
+**Battlefield Scenarios:**
+- 🎈 **Simple HTTPBin** — Lightning-fast validation with a lightweight instance
+- 🎪 **Traefik Load Balancer** — Modern, cloud-native proxying across triple backend instances
+- 🚀 **Nginx Load Balancer** — Battle-hardened, high-throughput reverse proxy simulation
 
 #### 📮 **3. HTTP Methods** — *Test What Matters*
-Different HTTP methods have wildly different performance characteristics. Benchmark the operations your application actually uses. **All standard HTTP methods are supported.**
+Performance isn't uniform. A GET request behaves differently than a heavy POST. Benchmark the exact operations your users actually perform. **Full support for the entire HTTP method specification.**
 
-**Common Methods (Examples):**
-- 📥 **GET** — Read operations and caching behavior
-- 📤 **POST** — Payload submission and data creation
-- 🔄 **PUT** — Full resource updates
-- 🩹 **PATCH** — Partial modifications
-- 🗑️ **DELETE** — Resource cleanup operations
-- 🔍 **HEAD**, **OPTIONS**, **TRACE**, **CONNECT** — And more...
+**Method Matrix (Examples):**
+- 📥 **GET** — High-frequency reads and cache validation
+- 📤 **POST** — Payload-heavy data ingestion and processing
+- 🔄 **PUT** / 🩹 **PATCH** — Resource updates and state transitions
+- 🗑️ **DELETE** — Cleanup and resource destruction
+- 🔍 **HEAD**, **OPTIONS**, **TRACE**, **CONNECT** — And the rest...
 
 ### 💎 Key Features
 
-✅ **Mix & Match Testing** — Any client × any server × any method = complete coverage  
-✅ **Real-World Metrics** — Throughput (RPS), latency percentiles (p95/p99), CPU, and memory  
-✅ **Persistent Storage** — SQLite database for historical trend analysis  
-✅ **Production-Ready** — Test with HTTPS, load balancers, and multi-instance deployments  
-✅ **Zero Interference** — Non-blocking resource monitoring doesn't skew results  
-✅ **Extensible Design** — Clean adapter pattern for adding custom clients  
+✅ **Infinite Combinations** — Mix and match any client, server, and method for 360° coverage  
+✅ **Granular Telemetry** — Track throughput (RPS), p95/p99 latency, and real-time CPU/Memory usage  
+✅ **Long-term Analysis** — Built-in SQLite persistence for historical trend tracking and regression testing  
+✅ **Production Parity** — Fully supports HTTPS, load balancers, and multi-instance topologies  
+✅ **Stealth Monitoring** — Background resource sampling ensures zero interference with benchmark accuracy  
+✅ **Developer First** — Modular adapter pattern makes adding custom clients a breeze  
 
 ### 🎬 Quick Example
 
+*Run a head-to-head comparison between top libraries using high-concurrency POST requests against an Nginx-backed cluster:*
+
 ```bash
-# Compare all clients against Nginx with POST requests
 python -m http_benchmark.cli \
   --url https://localhost/post \
   --method POST \
   --body '{"test": "data"}' \
   --compare requests httpx aiohttp \
-  --concurrency 50 \
-  --duration 60
+  --concurrency 5 \
+  --duration 1
 ```
 
-**The Result?** Hard data showing which client handles your specific workload best. No more architecture debates based on hunches.
+**The Result?** Cold, hard facts delivered straight to your console. End the architecture debates and start building on a foundation of measured performance.
 
 ---
 
@@ -142,88 +142,24 @@ The framework is built with extensibility in mind, featuring a clean adapter lay
 
 ### 🖥️ Step 1: Launch Your Test Server
 
-Choose a server configuration that mirrors your production environment. Each option provides different levels of complexity and realism.
+Choose a server configuration that mirrors your production environment:
 
-#### **Option 1: Simple HTTPBin** 🎈
-*Perfect for quick validation and debugging*
-
-**Features:**
-- Single instance, minimal overhead
-- HTTP-only support
-- Ideal for baseline measurements
-
-**Launch:**
 ```bash
+# Option 1: Simple HTTPBin (single instance, HTTP only)
 docker-compose -f httpbin_server/docker-compose.httpbin.yml up -d
-```
 
-**Endpoints:**
-- `http://localhost/get`, `/post`, `/put`, `/patch`, `/delete`
-
-**Test it:**
-```bash
-curl http://localhost/get
-```
-
----
-
-#### **Option 2: Traefik Load Balancer** 🎪
-*Cloud-native proxy for real-world simulation*
-
-**Features:**
-- 3 load-balanced HTTPBin instances
-- HTTP + HTTPS support (self-signed cert)
-- Health checks and automatic failover
-- Dynamic routing and service discovery
-
-**Launch:**
-```bash
+# Option 2: Traefik Load Balancer (3 instances, HTTP/HTTPS, cloud-native)
 docker-compose -f httpbin_server/docker-compose.traefik.yml up -d
-```
 
-**Endpoints:**
-- `http://localhost/` (load balanced)
-- `https://localhost/` (TLS termination)
-
-**Test it:**
-```bash
-# HTTP
-curl http://localhost/get
-
-# HTTPS (ignore self-signed cert)
-curl -k https://localhost/get
-```
-
----
-
-#### **Option 3: Nginx Load Balancer** 🚀
-*Battle-tested reverse proxy for maximum performance*
-
-**Features:**
-- 3 load-balanced HTTPBin instances
-- Optimized for raw throughput
-- HTTP + HTTPS support
-- Industry-standard configuration
-
-**Launch:**
-```bash
+# Option 3: Nginx Load Balancer (3 instances, HTTP/HTTPS, high performance)
 docker-compose -f httpbin_server/docker-compose.nginx.yml up -d
 ```
 
-**Endpoints:**
-- `http://localhost/` (load balanced)
-- `https://localhost/` (SSL termination)
-
-**Test it:**
+**Test your server:**
 ```bash
-# HTTP
-curl http://localhost/get
-
-# HTTPS
-curl -k https://localhost/post -d '{"key":"value"}'
+curl http://localhost/get                    # HTTP
+curl -k https://localhost/get                # HTTPS (ignore self-signed cert)
 ```
-
----
 
 ### 📊 Server Comparison Matrix
 
@@ -233,85 +169,48 @@ curl -k https://localhost/post -d '{"key":"value"}'
 | **HTTP Support** | ✅ | ✅ | ✅ |
 | **HTTPS Support** | ❌ | ✅ | ✅ |
 | **Load Balancing** | ❌ | ✅ | ✅ |
-| **Health Checks** | ❌ | ✅ | ✅ |
-| **SSL/TLS Termination** | ❌ | ✅ | ✅ |
 | **Resource Overhead** | Low | High | Medium |
-| **Configuration Complexity** | Low | High | Medium |
 | **Best For** | **Quick tests** | **Real-world simulation** | **Raw performance** |
 
 ---
 
 ### ▶️ Step 2: Run Your Benchmark
 
-#### Single Client Benchmark
-Test a specific client with your chosen configuration:
+#### 🖥️ Using CLI
 
+**Single Client Benchmark:**
 ```bash
 python -m http_benchmark.cli \
   --url http://localhost/get \
   --client httpx \
-  --concurrency 20 \
-  --duration 30
+  --concurrency 5 \
+  --duration 2
 ```
 
-#### Head-to-Head Comparison
-Compare multiple clients simultaneously:
-
+**Head-to-Head Comparison:**
 ```bash
 python -m http_benchmark.cli \
   --url http://localhost/get \
   --compare requests httpx aiohttp \
-  --concurrency 10 \
-  --duration 10
+  --concurrency 5 \
+  --duration 2
 ```
 
-#### Full HTTP Method Coverage
-Test different request types to understand method-specific performance:
-
+**Different HTTP Methods:**
 ```bash
-# GET - Baseline read performance
-python -m http_benchmark.cli \
-  --url http://localhost/get \
-  --method GET \
-  --client requests \
-  --concurrency 50 \
-  --duration 30
+# GET
+python -m http_benchmark.cli --url http://localhost/get --method GET --client requests --concurrency 1 --duration 1
 
-# POST - Payload handling
-python -m http_benchmark.cli \
-  --url http://localhost/post \
-  --method POST \
-  --client httpx \
-  --body '{"user": "test", "action": "create"}' \
-  --concurrency 50 \
-  --duration 30
+# POST with payload
+python -m http_benchmark.cli --url http://localhost/post --method POST --body '{"user": "test"}' --client httpx --concurrency 1 --duration 1
 
-# PUT - Full resource updates
-python -m http_benchmark.cli \
-  --url http://localhost/put \
-  --method PUT \
-  --client aiohttp \
-  --body '{"id": 123, "status": "updated"}' \
-  --concurrency 50 \
-  --duration 30
-
-# PATCH - Partial modifications
-python -m http_benchmark.cli \
-  --url http://localhost/patch \
-  --method PATCH \
-  --client urllib3 \
-  --body '{"status": "modified"}' \
-  --concurrency 50 \
-  --duration 30
-
-# DELETE - Resource cleanup
-python -m http_benchmark.cli \
-  --url http://localhost/delete \
-  --method DELETE \
-  --client pycurl \
-  --concurrency 50 \
-  --duration 30
+# PUT, PATCH, DELETE
+python -m http_benchmark.cli --url http://localhost/put --method PUT --client aiohttp --concurrency 1 --duration 1
 ```
+
+---
+
+#### 🐍 Using Python Library
 
 ---
 
