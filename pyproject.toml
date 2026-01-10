@@ -7,8 +7,9 @@ name = "http-client-benchmarker"
 version = "0.1.0"
 description = "A Python HTTP Client Performance Benchmark Framework"
 readme = "README.md"
-authors = [{name = "Developer", email = "dev@example.com"}]
+authors = [{name = "Qunfei Wu", email = "wu.qunfei@gmail.com"}]
 license = {text = "MIT"}
+requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

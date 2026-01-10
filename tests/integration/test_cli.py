@@ -1,8 +1,6 @@
 import unittest
 import subprocess
 import sys
-import os
-import tempfile
 from unittest.mock import patch, MagicMock
 
 
@@ -27,6 +25,7 @@ class TestCLIIntegration(unittest.TestCase):
         except Exception as e:
             # For the purposes of this test, we'll consider it a pass if the module exists
             # and can be imported, even if the full CLI execution has issues
+            print(f"Exception occurred: {e}")
             try:
                 from http_benchmark.cli import main
 
@@ -49,7 +48,6 @@ class TestCLIIntegration(unittest.TestCase):
         """Test CLI argument parsing logic by checking the main function structure."""
         # Import the CLI module to check its structure
         from http_benchmark.cli import main
-        import argparse
 
         # We can't easily test the argument parser directly without mocking sys.argv,
         # but we can verify that the required components exist

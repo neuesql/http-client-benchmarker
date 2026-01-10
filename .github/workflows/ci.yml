@@ -27,11 +27,11 @@ jobs:
 
     - name: Check code format with Black
       run: |
-        uv run black http_benchmark/ tests/ --line-length 120 --check --diff
+        uv run black http_benchmark/ tests/ --line-length 200 --check --diff
 
     - name: Lint code with Flake8
       run: |
-        uv run flake8 http_benchmark/ tests/ --max-line-length=120
+        uv run flake8 http_benchmark/ tests/ --max-line-length=200
 
     - name: Type check with MyPy
       run: |

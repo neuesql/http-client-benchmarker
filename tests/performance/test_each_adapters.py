@@ -46,6 +46,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -80,6 +81,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -115,6 +117,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -150,6 +153,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -185,6 +189,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -219,6 +224,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -253,6 +259,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
@@ -287,6 +294,7 @@ class TestLocalhostAdapters(unittest.TestCase):
             )
 
         except Exception as e:
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 

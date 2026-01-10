@@ -56,6 +56,7 @@ class TestEndToEndFunctionality(unittest.TestCase):
 
         except Exception as e:
             # If there's a network issue, at least verify the objects can be created
+            print(f"Exception occurred: {e}")
             self.assertIsNotNone(runner)
             self.assertIsNotNone(config)
 
