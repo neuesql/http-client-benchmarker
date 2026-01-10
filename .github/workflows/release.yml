@@ -1,4 +1,4 @@
-name: Release to PyPI
+name: Release to PyPI and GitHub
 
 on:
   workflow_run:
@@ -6,103 +6,92 @@ on:
     types:
       - completed
     branches: [main]
+    # Only run when CI succeeds
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
   workflow_dispatch:  # Allow manual triggering
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.2.3)'
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: '3.12'
 
 jobs:
-  build-and-publish:
+  release:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment: production  # Use production environment for security
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch all history for setuptools_scm versioning
+        fetch-depth: 0
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
       with:
-        python-version: '3.12'
+        python-version: ${{ env.PYTHON_VERSION }}
         cache-dependency-path: 'uv.lock'
 
     - name: Install dependencies
       run: |
         uv sync --all-extras --dev
 
-    - name: Build package with uv
+    - name: Get version
+      id: version
       run: |
-        # Clean previous builds
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          # Extract version from pyproject.toml for workflow_run events
+          VERSION=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])" 2>/dev/null || echo "0.1.0")
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "📦 Release version: $VERSION"
+
+    - name: Build package
+      run: |
+        echo "🏗️ Building package..."
         rm -rf dist/ build/ *.egg-info/
-        # Build the package using uv
         uv build
+        echo "✅ Package built successfully"
 
-    - name: Verify package build
-      run: |
-        # Verify the built package structure
-        ls -la dist/
-        echo "Package files created successfully"
-        
-        # Check wheel contents
-        echo "Wheel contents:"
-        uv run python -m zipfile -l dist/*.whl | head -20
-        
-        # Verify package metadata
-        echo "Package metadata check:"
-        uv run python -c "
-        import pkg_resources
-        import sys
-        
-        try:
-            dist = pkg_resources.get_distribution('http-client-benchmarker')
-            print(f'✅ Package: {dist.project_name} v{dist.version}')
-            print(f'✅ Location: {dist.location}')
-            print(f'✅ Entry points: {list(dist.get_entry_map().keys())}')
-        except Exception as e:
-            print(f'❌ Package check failed: {e}')
-            sys.exit(1)
-        "
-
-    - name: Publish to PyPI with uv
+    - name: Publish to PyPI
       env:
         UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
-        # Upload to PyPI using uv publish with token
-        uv publish --token "$UV_PUBLISH_TOKEN" --index pypi
+        echo "🚀 Publishing to PyPI..."
+        uv publish --token "$UV_PUBLISH_TOKEN" --index pypi dist/
+        echo "✅ Published to PyPI successfully"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
-        tag_name: release-${{ github.run_id }}
-        name: Release ${{ github.run_id }}
+        tag_name: v${{ steps.version.outputs.version }}
+        name: Release v${{ steps.version.outputs.version }}
         body: |
-          ## 🚀 HTTP Client Benchmarker Release
+          ## 🚀 HTTP Client Benchmarker v${{ steps.version.outputs.version }}
           
           **⚡ Performance benchmarking for your HTTP stack**
           
-          This release includes improvements and optimizations for HTTP client performance benchmarking.
-          
-          ### 📦 Package Details
-          - **Package**: http-client-benchmarker
-          - **Version**: ${{ github.run_id }}
-          - **Python**: 3.12+
-          - **Package Manager**: uv
-          - **Run ID**: ${{ github.run_id }}
-          
-          ### 🔧 Installation
+          ### 📦 Installation
           ```bash
-          # Using pip (traditional)
-          pip install http-client-benchmarker
+          # Using pip
+          pip install http-client-benchmarker==${{ steps.version.outputs.version }}
           
           # Using uv (recommended)
-          uv add http-client-benchmarker
+          uv add http-client-benchmarker==${{ steps.version.outputs.version }}
           ```
           
-          ### 🆕 What's New
-          - Full uv package management integration
-          - Optimized CI/CD pipeline
-          - Enhanced package building and publishing
+          ### 🔧 Package Details
+          - **Package**: http-client-benchmarker
+          - **Version**: v${{ steps.version.outputs.version }}
+          - **Python**: 3.12+
+          - **Package Manager**: uv
           
           ### 🐛 Bug Reports
           Please report issues at: https://github.com/${{ github.repository }}/issues
@@ -111,3 +100,5 @@ jobs:
           If you find this useful, please give us a ⭐ on GitHub!
         draft: false
         prerelease: false
+        files: |
+          dist/*
