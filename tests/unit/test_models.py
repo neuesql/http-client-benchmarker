@@ -12,6 +12,7 @@ class TestBenchmarkResult(unittest.TestCase):
         result = BenchmarkResult(
             name="Test Benchmark",
             client_library="requests",
+            client_type="sync",
             http_method="GET",
             url="https://example.com",
             start_time=datetime.now(),
@@ -35,6 +36,7 @@ class TestBenchmarkResult(unittest.TestCase):
         
         self.assertEqual(result.name, "Test Benchmark")
         self.assertEqual(result.client_library, "requests")
+        self.assertEqual(result.client_type, "sync")
         self.assertEqual(result.http_method, "GET")
         self.assertEqual(result.requests_count, 100)
         self.assertEqual(result.requests_per_second, 10.0)
@@ -44,6 +46,7 @@ class TestBenchmarkResult(unittest.TestCase):
         result = BenchmarkResult(
             name="Test Benchmark",
             client_library="requests",
+            client_type="sync",
             http_method="GET",
             url="https://example.com",
             start_time=datetime.now(),
@@ -68,7 +71,9 @@ class TestBenchmarkResult(unittest.TestCase):
         result_dict = result.to_dict()
         self.assertIn('name', result_dict)
         self.assertIn('client_library', result_dict)
+        self.assertIn('client_type', result_dict)
         self.assertEqual(result_dict['client_library'], 'requests')
+        self.assertEqual(result_dict['client_type'], 'sync')
 
 
 class TestBenchmarkConfiguration(unittest.TestCase):

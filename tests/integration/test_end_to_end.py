@@ -153,6 +153,7 @@ class TestStorageIntegration(unittest.TestCase):
         result = BenchmarkResult(
             name="Integration Test Result",
             client_library="httpx",
+            client_type="sync",
             http_method="GET",
             url="https://httpbin.org/get",
             start_time=datetime.now(),

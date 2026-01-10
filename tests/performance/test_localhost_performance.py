@@ -10,7 +10,7 @@ from http_benchmark.storage import ResultStorage
 class TestLocalhostPerformance(unittest.TestCase):
     """Performance tests comparing different HTTP clients against localhost."""
 
-    LOCALHOST_URL = "http://localhost/get"
+    LOCALHOST_URL = "https://localhost/get"
     TEST_DURATION = 1
     TEST_CONCURRENCY = 1
     TIMEOUT = 30
@@ -23,6 +23,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             concurrency=self.TEST_CONCURRENCY,
             duration_seconds=self.TEST_DURATION,
             client_library="requests",
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -57,6 +58,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             concurrency=self.TEST_CONCURRENCY,
             duration_seconds=self.TEST_DURATION,
             client_library="httpx",
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -92,6 +94,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             duration_seconds=self.TEST_DURATION,
             client_library="aiohttp",
             is_async=True,
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -127,6 +130,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             duration_seconds=self.TEST_DURATION,
             client_library="httpx",
             is_async=True,
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -162,6 +166,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             duration_seconds=self.TEST_DURATION,
             client_library="requestx",
             is_async=True,
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -196,6 +201,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             concurrency=self.TEST_CONCURRENCY,
             duration_seconds=self.TEST_DURATION,
             client_library="urllib3",
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -230,6 +236,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             concurrency=self.TEST_CONCURRENCY,
             duration_seconds=self.TEST_DURATION,
             client_library="pycurl",
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -264,6 +271,7 @@ class TestLocalhostPerformance(unittest.TestCase):
             concurrency=self.TEST_CONCURRENCY,
             duration_seconds=self.TEST_DURATION,
             client_library="requestx",
+            verify_ssl=False,
             timeout=self.TIMEOUT,
         )
 
@@ -320,6 +328,7 @@ class TestLocalhostPerformance(unittest.TestCase):
                 duration_seconds=self.TEST_DURATION,
                 client_library=actual_client,
                 is_async=is_async,
+                verify_ssl=False,
                 timeout=self.TIMEOUT,
             )
 
@@ -438,6 +447,7 @@ class TestLocalhostPerformance(unittest.TestCase):
                 concurrency=concurrency,
                 duration_seconds=self.TEST_DURATION,
                 client_library="httpx",
+                verify_ssl=False,
                 timeout=self.TIMEOUT,
             )
 

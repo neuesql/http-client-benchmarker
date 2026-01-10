@@ -16,10 +16,11 @@ class HttpxAdapter(BaseHTTPAdapter):
         super().__init__("httpx")
         self.client = None
         self.async_client = None
+        self.verify_ssl = True
 
     def __enter__(self):
         """Initialize sync client when entering sync context."""
-        self.client = httpx.Client()
+        self.client = httpx.Client(verify=self.verify_ssl)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -29,7 +30,7 @@ class HttpxAdapter(BaseHTTPAdapter):
 
     async def __aenter__(self):
         """Initialize async client when entering async context."""
-        self.async_client = httpx.AsyncClient()
+        self.async_client = httpx.AsyncClient(verify=self.verify_ssl)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

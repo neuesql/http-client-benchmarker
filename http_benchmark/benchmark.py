@@ -82,6 +82,7 @@ class BenchmarkRunner:
         benchmark_result = BenchmarkResult(
             name=self.config.name,
             client_library=self.config.client_library,
+            client_type="async" if self.config.is_async else "sync",
             http_method=self.config.http_method,
             url=self.config.target_url,
             start_time=start_time,
@@ -112,7 +113,9 @@ class BenchmarkRunner:
         """Run a synchronous benchmark."""
         app_logger.info("Running synchronous benchmark")
 
-        with adapter_class() as adapter:
+        adapter = adapter_class()
+        adapter.verify_ssl = http_request.verify_ssl
+        with adapter:
             return self._execute_sync_benchmark(adapter, http_request)
 
     def _execute_sync_benchmark(self, adapter, http_request: HTTPRequest) -> Dict[str, Any]:
@@ -243,7 +246,9 @@ class BenchmarkRunner:
         """Run an asynchronous benchmark."""
         app_logger.info("Running asynchronous benchmark")
 
-        async with adapter_class() as adapter:
+        adapter = adapter_class()
+        adapter.verify_ssl = http_request.verify_ssl
+        async with adapter:
             return await self._execute_async_benchmark(adapter, http_request)
 
     async def _execute_async_benchmark(

@@ -13,6 +13,7 @@ class BenchmarkResult(BaseModel):
         self,
         name: str,
         client_library: str,
+        client_type: str,
         http_method: str,
         url: str,
         start_time: datetime,
@@ -37,6 +38,7 @@ class BenchmarkResult(BaseModel):
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.client_library = client_library
+        self.client_type = client_type
         self.http_method = http_method
         self.url = url
         self.start_time = start_time

@@ -29,6 +29,7 @@ class TestResultStorage(unittest.TestCase):
         result = BenchmarkResult(
             name="Test Benchmark",
             client_library="requests",
+            client_type="sync",
             http_method="GET",
             url="https://example.com",
             start_time=datetime.now(),
@@ -59,12 +60,14 @@ class TestResultStorage(unittest.TestCase):
         self.assertEqual(retrieved_result.id, result.id)
         self.assertEqual(retrieved_result.name, result.name)
         self.assertEqual(retrieved_result.client_library, result.client_library)
+        self.assertEqual(retrieved_result.client_type, result.client_type)
 
     def test_get_result_by_id(self):
         """Test retrieving a result by ID."""
         result = BenchmarkResult(
             name="Test Get By ID",
             client_library="httpx",
+            client_type="async",
             http_method="POST",
             url="https://example.com/api",
             start_time=datetime.now(),
@@ -102,6 +105,7 @@ class TestResultStorage(unittest.TestCase):
             result = BenchmarkResult(
                 name=name,
                 client_library="requests",
+                client_type="sync",
                 http_method="GET",
                 url=f"https://example.com/{i}",
                 start_time=datetime.now(),
@@ -138,6 +142,7 @@ class TestResultStorage(unittest.TestCase):
             result = BenchmarkResult(
                 name=f"Test All Results {i}",
                 client_library="httpx",
+                client_type="async",
                 http_method="GET",
                 url=f"https://example.com/{i}",
                 start_time=datetime.now(),
@@ -180,6 +185,7 @@ class TestResultStorage(unittest.TestCase):
             result = BenchmarkResult(
                 name="Comparison Test",
                 client_library=client,
+                client_type="sync",
                 http_method="GET",
                 url="https://example.com",
                 start_time=datetime.now(),
@@ -237,7 +243,7 @@ class TestResultStorage(unittest.TestCase):
         
         column_names = [col[1] for col in columns]
         expected_columns = [
-            'id', 'name', 'client_library', 'http_method', 'url', 'start_time', 
+            'id', 'name', 'client_library', 'client_type', 'http_method', 'url', 'start_time', 
             'end_time', 'duration', 'requests_count', 'requests_per_second', 
             'avg_response_time', 'min_response_time', 'max_response_time', 
             'p95_response_time', 'p99_response_time', 'cpu_usage_avg', 
