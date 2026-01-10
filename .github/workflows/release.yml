@@ -73,7 +73,9 @@ jobs:
         UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
         echo "🚀 Publishing to PyPI..."
-        uv publish --token "$UV_PUBLISH_TOKEN" --index pypi dist/
+        echo "Package files in dist/:"
+        ls -la dist/
+        uv publish --token "$UV_PUBLISH_TOKEN" dist/http_client_benchmarker-*.tar.gz dist/http_client_benchmarker-*.whl
         echo "✅ Published to PyPI successfully"
 
     - name: Create GitHub Release
