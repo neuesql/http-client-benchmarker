@@ -1,0 +1,9 @@
+{
+    admin off
+}
+
+localhost {
+    reverse_proxy httpbin1:80 httpbin2:80 httpbin3:80 {
+        lb_policy round_robin
+    }
+}
