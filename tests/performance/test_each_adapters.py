@@ -1,7 +1,7 @@
 """Performance tests for different HTTP clients targeting localhost with GET requests (HTTP version)."""
 
 import unittest
-from tabulate import tabulate
+
 from http_benchmark.benchmark import BenchmarkRunner
 from http_benchmark.models.benchmark_configuration import BenchmarkConfiguration
 from http_benchmark.storage import ResultStorage

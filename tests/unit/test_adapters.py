@@ -1,11 +1,11 @@
 import unittest
-from http_benchmark.clients.requests_adapter import RequestsAdapter
-from http_benchmark.clients.httpx_adapter import HttpxAdapter
+
 from http_benchmark.clients.aiohttp_adapter import AiohttpAdapter
-from http_benchmark.clients.urllib3_adapter import Urllib3Adapter
+from http_benchmark.clients.httpx_adapter import HttpxAdapter
 from http_benchmark.clients.pycurl_adapter import PycurlAdapter
+from http_benchmark.clients.requests_adapter import RequestsAdapter
 from http_benchmark.clients.requestx_adapter import RequestXAdapter
-from http_benchmark.models.http_request import HTTPRequest
+from http_benchmark.clients.urllib3_adapter import Urllib3Adapter
 
 
 class TestRequestsAdapter(unittest.TestCase):
