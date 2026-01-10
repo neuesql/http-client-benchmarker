@@ -4,6 +4,7 @@ import unittest
 from tabulate import tabulate
 from http_benchmark.benchmark import BenchmarkRunner
 from http_benchmark.models.benchmark_configuration import BenchmarkConfiguration
+from http_benchmark.storage import ResultStorage
 
 
 class TestLocalhostPerformance(unittest.TestCase):
@@ -29,6 +30,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -61,6 +64,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -94,6 +99,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -127,6 +134,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -160,6 +169,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -192,6 +203,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -224,6 +237,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -256,6 +271,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
         try:
             result = runner.run()
+            storage = ResultStorage()
+            storage.save_result(result)
 
             self.assertGreaterEqual(result.requests_count, 0)
             self.assertGreaterEqual(result.requests_per_second, 0)
@@ -310,6 +327,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
             try:
                 result = runner.run()
+                storage = ResultStorage()
+                storage.save_result(result)
                 results[client] = result
 
                 table_data.append(
@@ -426,6 +445,8 @@ class TestLocalhostPerformance(unittest.TestCase):
 
             try:
                 result = runner.run()
+                storage = ResultStorage()
+                storage.save_result(result)
                 results.append((label, result))
 
                 print(
