@@ -81,9 +81,7 @@ class HttpxAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
 
             start_time = asyncio.get_event_loop().time()
-            response = await self.async_client.request(
-                method=method, url=url, headers=headers, content=data, timeout=timeout
-            )
+            response = await self.async_client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
             end_time = asyncio.get_event_loop().time()
 
             return {
