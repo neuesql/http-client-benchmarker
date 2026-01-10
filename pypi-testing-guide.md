@@ -17,7 +17,7 @@ ls -la dist/
 ### Step 2: Test Local Installation
 ```bash
 # Install locally
-uv pip install dist/http_client_benchmarker-0.1.0-py3-none-any.whl
+uv pip install dist/http_client_benchmarker-5.0.0-py3-none-any.whl
 
 # Test import
 uv run python -c "from http_benchmark import __version__; print(f'Version: {__version__}')"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "http-client-benchmarker"
-version = "0.1.0"
+version = "5.0.0"
 description = "A Python HTTP Client Performance Benchmark Framework"
 readme = "README.md"
 authors = [{name = "Qunfei Wu", email = "wu.qunfei@gmail.com"}]
