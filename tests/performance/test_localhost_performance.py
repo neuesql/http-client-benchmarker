@@ -23,7 +23,8 @@ class TestLocalhostPerformance(unittest.TestCase):
         self.run_all_clients(self.LOCALHOST_URL_HTTPS)
 
     def run_all_clients(self, host_url):
-        """Compare performance of all HTTP clients against localhost (HTTP)."""
+        """Compare performance of all HTTP clients against localhost."""
+        is_https = host_url.startswith("https")
         client_libraries = [
             "requests",
             "httpx",
@@ -38,7 +39,7 @@ class TestLocalhostPerformance(unittest.TestCase):
         table_data = []
 
         print("\n" + "=" * 80)
-        print("HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - HTTP)")
+        print(f"HTTP CLIENT PERFORMANCE COMPARISON (localhost GET - {'HTTPS' if is_https else 'HTTP'})")
         print("=" * 80)
 
         for client in client_libraries:
@@ -51,6 +52,7 @@ class TestLocalhostPerformance(unittest.TestCase):
                 duration_seconds=self.TEST_DURATION,
                 client_library=actual_client,
                 is_async=is_async,
+                verify_ssl=False,
                 timeout=self.TIMEOUT,
             )
 

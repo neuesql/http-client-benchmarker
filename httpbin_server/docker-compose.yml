@@ -38,17 +38,15 @@ services:
           cpus: '0.5'
           memory: 256M
 
-  caddy:
-    image: caddy:alpine
-    container_name: caddy
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./certs:/etc/caddy/certs:ro
-      - ./caddy_data:/data
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - httpbin1
       - httpbin2

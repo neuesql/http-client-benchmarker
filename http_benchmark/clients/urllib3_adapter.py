@@ -16,13 +16,13 @@ class Urllib3Adapter(BaseHTTPAdapter):
         self.pool_no_verify = None
         # Disable SSL warnings if not verifying SSL
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        
+
     def __enter__(self):
         """Initialize pool managers when entering sync context."""
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.pool = urllib3.PoolManager()
         self.pool_no_verify = urllib3.PoolManager(
-            cert_reqs="CERT_NONE", assert_hostname=False
+            cert_reqs="CERT_NONE"
         )
         return self
 
