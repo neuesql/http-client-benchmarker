@@ -305,34 +305,6 @@ python -m http_benchmark.cli \
 
 ---
 
-## ⚙️ Configuration
-
-Customize the framework using environment variables. All variables are prefixed with `HTTP_BENCHMARK_`.
-
-### Environment Variables
-
-| Variable | Default | Description |
-|:---|:---|:---|
-| `HTTP_BENCHMARK_DEFAULT_CONCURRENCY` | `10` | Default concurrent workers |
-| `HTTP_BENCHMARK_DEFAULT_DURATION_SECONDS` | `30` | Default benchmark duration (seconds) |
-| `HTTP_BENCHMARK_MAX_CONCURRENCY` | `10000` | Safety limit for concurrency |
-| `HTTP_BENCHMARK_SQLITE_DB_PATH` | `benchmark_results.db` | SQLite database file path |
-| `HTTP_BENCHMARK_RESOURCE_MONITORING_INTERVAL` | `0.1` | Resource sampling interval (seconds) |
-
-### Example Configuration
-
-```bash
-# Set custom defaults
-export HTTP_BENCHMARK_DEFAULT_CONCURRENCY=50
-export HTTP_BENCHMARK_DEFAULT_DURATION_SECONDS=60
-export HTTP_BENCHMARK_SQLITE_DB_PATH=/tmp/my_benchmarks.db
-
-# Run benchmark with custom config
-python -m http_benchmark.cli --url http://localhost/get --client httpx
-```
-
----
-
 ## 💾 Database Schema & Analysis
 
 All benchmark results are persisted to SQLite for long-term trend analysis and data-driven decision making.
