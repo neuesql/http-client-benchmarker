@@ -13,10 +13,10 @@ In the high-stakes world of performance-critical services, your choice of HTTP c
 
 ### 🎯 Why This Framework?
 
-Most benchmarking tools are myopic, focusing on either just the client or just the server. We take a holistic, **multi-dimensional approach** to help you optimize the three critical pillars of your HTTP infrastructure:
+Most benchmarking tools focus on either just the client or just the server. We take a holistic, **multi-dimensional approach** to help you optimize the three critical pillars of your HTTP infrastructure:
 
 #### 🔧 **1. HTTP Client Selection** — *Choose Your Weapon*
-Find the perfect library for your specific workload. Should you stick with the classic `requests`? Is `httpx` worth the upgrade for HTTP/2? Does `aiohttp` live up to the async hype? Get the numbers, not the hype.
+Find the perfect library for your specific workload. Compare the battle-tested `requests`, the modern `httpx`, or the high-performance `aiohttp` and `pycurl`. Get the numbers, not the hype.
 
 **Available Arsenal:**
 - 🐍 **`requests`** — The battle-tested industry standard
@@ -35,14 +35,9 @@ Don't test in a vacuum. Benchmark against production-grade environments. Compare
 - 🚀 **Nginx Load Balancer** — Battle-hardened, high-throughput reverse proxy simulation
 
 #### 📮 **3. HTTP Methods** — *Test What Matters*
-Performance isn't uniform. A GET request behaves differently than a heavy POST. Benchmark the exact operations your users actually perform. **Full support for the entire HTTP method specification.**
+Performance isn't uniform. A GET request behaves differently than a heavy POST. Benchmark the exact operations your users actually perform with **full support for the entire HTTP method specification.**
 
-**Method Matrix (Examples):**
-- 📥 **GET** — High-frequency reads and cache validation
-- 📤 **POST** — Payload-heavy data ingestion and processing
-- 🔄 **PUT** / 🩹 **PATCH** — Resource updates and state transitions
-- 🗑️ **DELETE** — Cleanup and resource destruction
-- 🔍 **HEAD**, **OPTIONS**, **TRACE**, **CONNECT** — And the rest...
+---
 
 ### 💎 Key Features
 
@@ -53,9 +48,11 @@ Performance isn't uniform. A GET request behaves differently than a heavy POST. 
 ✅ **Stealth Monitoring** — Background resource sampling ensures zero interference with benchmark accuracy  
 ✅ **Developer First** — Modular adapter pattern makes adding custom clients a breeze  
 
+---
+
 ### 🎬 Quick Example
 
-*Run a head-to-head comparison between top libraries using high-concurrency POST requests against an Nginx-backed cluster:*
+Run a head-to-head comparison between top libraries using high-concurrency POST requests against an Nginx-backed cluster:
 
 ```bash
 python -m http_benchmark.cli \
@@ -100,11 +97,11 @@ The framework is built with extensibility in mind, featuring a clean adapter lay
 ```
 
 **Data Flow:**
-1. Configure your benchmark (client, server, method, concurrency)
-2. Execute requests while monitoring system resources
-3. Collect and aggregate performance metrics
-4. Persist results to SQLite for analysis
-5. Display comparative results in the console
+1. **Configure**: Define client, server, method, and concurrency parameters.
+2. **Execute**: Launch high-frequency requests while monitoring system resources in the background.
+3. **Analyze**: Aggregate performance metrics including throughput and latency percentiles.
+4. **Persist**: Store detailed results in SQLite for historical analysis.
+5. **Report**: Visualize comparative data directly in your terminal.
 
 ---
 
@@ -155,13 +152,7 @@ docker-compose -f httpbin_server/docker-compose.traefik.yml up -d
 docker-compose -f httpbin_server/docker-compose.nginx.yml up -d
 ```
 
-**Test your server:**
-```bash
-curl http://localhost/get                    # HTTP
-curl -k https://localhost/get                # HTTPS (ignore self-signed cert)
-```
-
-### 📊 Server Comparison Matrix
+#### 📊 Server Comparison Matrix
 
 | Feature | 🎈 Simple HTTPBin | 🎪 Traefik | 🚀 Nginx |
 |:---|:---:|:---:|:---:|
@@ -198,9 +189,6 @@ python -m http_benchmark.cli \
 
 **Different HTTP Methods:**
 ```bash
-# GET
-python -m http_benchmark.cli --url http://localhost/get --method GET --client requests --concurrency 1 --duration 1
-
 # POST with payload
 python -m http_benchmark.cli --url http://localhost/post --method POST --body '{"user": "test"}' --client httpx --concurrency 1 --duration 1
 
@@ -212,74 +200,105 @@ python -m http_benchmark.cli --url http://localhost/put --method PUT --client ai
 
 #### 🐍 Using Python Library
 
+The framework can be used programmatically as a Python library for fine-grained control and integration into your own testing infrastructure.
+
+**Basic Usage:**
+
+```python
+from http_benchmark.benchmark import BenchmarkRunner
+from http_benchmark.models.benchmark_configuration import BenchmarkConfiguration
+from http_benchmark.storage import ResultStorage
+
+# Configure your benchmark
+config = BenchmarkConfiguration(
+    target_url="http://localhost/get",
+    http_method="GET",
+    concurrency=10,
+    duration_seconds=30,
+    client_library="requests",
+    is_async=False,
+    verify_ssl=False,
+    timeout=30,
+)
+
+# Run the benchmark
+runner = BenchmarkRunner(config)
+result = runner.run()
+
+# Access results
+print(f"RPS: {result.requests_per_second:.2f}")
+print(f"Avg Latency: {result.avg_response_time * 1000:.2f}ms")
+print(f"P95 Latency: {result.p95_response_time * 1000:.2f}ms")
+
+# Persist results
+storage = ResultStorage()
+storage.save_result(result)
+```
+
+**Compare Multiple Clients:**
+
+```python
+# Compare multiple HTTP clients
+clients = ["requests", "httpx", "aiohttp", "urllib3", "pycurl", "requestx"]
+results = {}
+
+for client in clients:
+    is_async = client in ("aiohttp", "requestx-async")
+    actual_client = client.replace("-async", "")
+    
+    config = BenchmarkConfiguration(
+        target_url="http://localhost/get",
+        http_method="GET",
+        concurrency=5,
+        duration_seconds=10,
+        client_library=actual_client,
+        is_async=is_async,
+    )
+    
+    runner = BenchmarkRunner(config)
+    result = runner.run()
+    results[client] = result
+    
+    print(f"{client}: {result.requests_per_second:.2f} RPS")
+
+# Find the fastest
+best = max(results.items(), key=lambda x: x[1].requests_per_second)
+print(f"\nFastest: {best[0]} ({best[1].requests_per_second:.2f} RPS)")
+```
+
+**Async Usage:**
+
+```python
+# For async clients (aiohttp, httpx with is_async=True)
+config = BenchmarkConfiguration(
+    target_url="http://localhost/get",
+    http_method="GET",
+    concurrency=100,
+    duration_seconds=30,
+    client_library="aiohttp",
+    is_async=True,
+)
+
+runner = BenchmarkRunner(config)
+result = runner.run()
+print(f"Async RPS: {result.requests_per_second:.2f}")
+```
+
 ---
 
 ## 🎯 Use Cases
 
 ### 🔍 Client Selection & Migration
-**Scenario:** Your team is considering migrating from `requests` to `httpx` to leverage HTTP/2.
-
-**Solution:**
-```bash
-python -m http_benchmark.cli \
-  --url https://localhost/get \
-  --compare requests httpx \
-  --concurrency 100 \
-  --duration 60
-```
-
-**Outcome:** Concrete RPS, latency, and resource usage data to inform your migration decision.
-
----
+**Scenario:** Your team is considering migrating from `requests` to `httpx` to leverage HTTP/2.  
+**Solution:** Run a 60-second high-concurrency comparison to quantify RPS, latency, and resource usage.
 
 ### 📈 Method-Specific Optimization
-**Scenario:** Your API's POST endpoints feel sluggish compared to GET requests.
-
-**Solution:**
-```bash
-# Test GET
-python -m http_benchmark.cli --url http://localhost/get --method GET --client httpx --duration 30
-
-# Test POST
-python -m http_benchmark.cli --url http://localhost/post --method POST --body '{"data":"test"}' --client httpx --duration 30
-```
-
-**Outcome:** Quantify the performance gap and identify whether it's client-side, server-side, or payload-related.
-
----
+**Scenario:** Your API's POST endpoints feel sluggish compared to GET requests.  
+**Solution:** Separately benchmark GET and POST methods with realistic payloads to identify the bottleneck.
 
 ### 🏗️ Infrastructure Comparison
-**Scenario:** Choosing between Nginx and Traefik for your production load balancer.
-
-**Solution:**
-```bash
-# Benchmark Nginx
-docker-compose -f httpbin_server/docker-compose.nginx.yml up -d
-python -m http_benchmark.cli --url http://localhost/get --client httpx --duration 60
-docker-compose -f httpbin_server/docker-compose.nginx.yml down
-
-# Benchmark Traefik
-docker-compose -f httpbin_server/docker-compose.traefik.yml up -d
-python -m http_benchmark.cli --url http://localhost/get --client httpx --duration 60
-```
-
-**Outcome:** Direct comparison of throughput, latency, and resource overhead under identical conditions.
-
----
-
-### 🔬 Resource Profiling at Scale
-**Scenario:** Understanding how your client behaves under extreme concurrency.
-
-**Solution:**
-```bash
-python -m http_benchmark.cli \
-  --url http://localhost/get \
-  --client aiohttp \
-  --concurrency 1000 \
-  --duration 120
-```
-
-**Outcome:** CPU and memory usage patterns at high load, helping you capacity plan.
+**Scenario:** Choosing between Nginx and Traefik for your production load balancer.  
+**Solution:** Swap Docker Compose environments and run identical benchmark suites to see which proxy handles the load better.
 
 ---
 
@@ -293,15 +312,6 @@ python -m http_benchmark.cli \
 | **requests** | ✅ | ❌ | Industry standard, extensive ecosystem, blocking I/O |
 | **requestx** | ✅ | ✅ | Performance-optimized fork, dual-mode execution |
 | **urllib3** | ✅ | ❌ | Foundation library, thread-safe pooling, low-level control |
-
-### When to Use Each Client
-
-- **`requests`**: Default choice for sync applications, extensive third-party integrations
-- **`httpx`**: When you need HTTP/2 or want sync/async flexibility
-- **`aiohttp`**: Pure async applications with high concurrency requirements
-- **`urllib3`**: When you need fine-grained control over connection pooling
-- **`pycurl`**: Maximum performance for sync applications, C-level speed
-- **`requestx`**: Drop-in replacement for requests with better performance
 
 ---
 
@@ -337,64 +347,29 @@ All benchmark results are persisted to SQLite for long-term trend analysis and d
 
 ### 🔍 Analysis Examples
 
-#### Compare Client Performance
+**Compare Client Performance:**
 ```sql
 SELECT 
     client_library,
-    client_type,
     ROUND(AVG(requests_per_second), 2) as avg_rps,
     ROUND(AVG(avg_response_time) * 1000, 2) as avg_latency_ms,
-    ROUND(AVG(p95_response_time) * 1000, 2) as p95_latency_ms,
-    ROUND(AVG(cpu_usage_avg), 2) as avg_cpu_pct,
-    ROUND(AVG(memory_usage_avg), 2) as avg_memory_mb
+    ROUND(AVG(cpu_usage_avg), 2) as avg_cpu_pct
 FROM benchmark_results
 WHERE http_method = 'GET'
-GROUP BY client_library, client_type
+GROUP BY client_library
 ORDER BY avg_rps DESC;
 ```
 
-#### Track Performance Over Time
+**Track Performance Over Time:**
 ```sql
 SELECT 
     DATE(created_at) as benchmark_date,
     client_library,
-    AVG(requests_per_second) as daily_avg_rps,
-    AVG(avg_response_time) * 1000 as daily_avg_latency_ms
+    AVG(requests_per_second) as daily_avg_rps
 FROM benchmark_results
 WHERE client_library = 'httpx'
 GROUP BY DATE(created_at), client_library
-ORDER BY benchmark_date DESC
-LIMIT 30;
-```
-
-#### Identify Performance Regressions
-```sql
-WITH baseline AS (
-    SELECT AVG(requests_per_second) as baseline_rps
-    FROM benchmark_results
-    WHERE client_library = 'requests' AND created_at < '2024-01-01'
-)
-SELECT 
-    created_at,
-    client_library,
-    requests_per_second,
-    ((requests_per_second - baseline_rps) / baseline_rps * 100) as pct_change
-FROM benchmark_results, baseline
-WHERE client_library = 'requests' AND created_at >= '2024-01-01'
-ORDER BY created_at;
-```
-
-#### Method-Specific Analysis
-```sql
-SELECT 
-    http_method,
-    AVG(requests_per_second) as avg_rps,
-    AVG(avg_response_time) * 1000 as avg_latency_ms,
-    AVG(error_rate) as avg_error_pct
-FROM benchmark_results
-WHERE client_library = 'httpx'
-GROUP BY http_method
-ORDER BY avg_rps DESC;
+ORDER BY benchmark_date DESC;
 ```
 
 ---
@@ -402,59 +377,28 @@ ORDER BY avg_rps DESC;
 ## 🧪 Development
 
 ### ✅ Running Tests
-
-We maintain comprehensive test coverage across unit, integration, and performance test suites.
-
 ```bash
 # Run all tests
 python -m unittest discover tests
 
-# Unit tests only
+# Run specific suite
 python -m unittest discover tests/unit
-
-# Integration tests (requires Docker)
 python -m unittest discover tests/integration
-
-# Performance tests
 python -m unittest discover tests/performance
 ```
 
 ### 🎨 Code Quality
-
 ```bash
-# Format code
+# Format and lint
 black http_benchmark/ tests/ --line-length 120
-
-# Lint code
 flake8 http_benchmark/ tests/ --max-line-length=120
-
-# Type checking
 mypy http_benchmark/
 ```
 
 ### 🔧 Adding a New HTTP Client
-
-1. Create a new adapter in `http_benchmark/adapters/`:
-   ```python
-   from http_benchmark.adapters.base import BaseAdapter
-   
-   class MyClientAdapter(BaseAdapter):
-       def execute_sync(self, url, method, **kwargs):
-           # Implementation
-           pass
-   ```
-
-2. Register in `http_benchmark/adapters/__init__.py`:
-   ```python
-   from .my_client import MyClientAdapter
-   
-   ADAPTERS = {
-       'myclient': MyClientAdapter,
-       # ... existing adapters
-   }
-   ```
-
-3. Add tests in `tests/unit/adapters/test_my_client.py`
+1. Create a new adapter in `http_benchmark/clients/` inheriting from `BaseAdapter`.
+2. Register the adapter in `http_benchmark/benchmark.py` within `BenchmarkRunner`.
+3. Add corresponding unit tests in `tests/unit/`.
 
 ---
 
@@ -463,68 +407,24 @@ mypy http_benchmark/
 ### 🔌 Adapter Pattern
 The framework uses a clean adapter pattern to decouple the benchmarking engine from specific HTTP client implementations. Each adapter implements a unified interface, making it trivial to add new clients without modifying core logic.
 
-**Benefits:**
-- Add new clients in minutes
-- Consistent behavior across all clients
-- Easy to maintain and test
-
 ### 📊 Non-Blocking Resource Monitoring
 A background thread continuously samples system metrics using `psutil` without interfering with benchmark execution. Metrics are collected at high frequency and aggregated post-benchmark.
 
-**Monitored Resources:**
-- CPU usage (per-core and aggregate)
-- Memory usage (RSS, VMS)
-- I/O operations (read/write bytes)
-- Network statistics
-
 ### ⚡ Concurrency Management
-
-**Synchronous Clients:**
-Managed via `ThreadPoolExecutor` with optimized pool sizing based on concurrency level.
-
-**Asynchronous Clients:**
-Powered by `asyncio` with task-based concurrency for maximum efficiency. No thread overhead.
-
-### 🎯 Request Execution Pipeline
-
-1. **Initialization:** Create client adapter, configure parameters
-2. **Warm-up:** Execute warm-up requests to stabilize connections
-3. **Monitoring Start:** Spawn resource monitoring thread
-4. **Execution:** Execute requests based on duration and concurrency
-5. **Monitoring Stop:** Halt resource sampling
-6. **Aggregation:** Calculate metrics (RPS, percentiles, resource usage)
-7. **Persistence:** Store results in SQLite
-8. **Reporting:** Display results to console
-
----
-
-## 📚 Additional Resources
-
-- **API Documentation**: See `docs/api.md` for programmatic usage
-- **Troubleshooting**: Common issues and solutions in `docs/troubleshooting.md`
-- **Performance Tuning**: Best practices in `docs/performance_tuning.md`
+- **Synchronous Clients**: Managed via `ThreadPoolExecutor` with optimized pool sizing.
+- **Asynchronous Clients**: Powered by `asyncio` with task-based concurrency for maximum efficiency.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see `CONTRIBUTING.md` for guidelines.
+We welcome contributions! Please feel free to submit a Pull Request.
 
 ---
 
 ## 📄 License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
-
----
-
-## 🙏 Acknowledgments
-
-Built with:
-- `psutil` for resource monitoring
-- `httpx`, `aiohttp`, `requests`, and other excellent HTTP libraries
-- `sqlite3` for persistence
-- Docker ecosystem for isolated testing
 
 ---
 
