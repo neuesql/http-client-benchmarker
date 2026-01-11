@@ -19,4 +19,6 @@ http:
           - url: "http://httpbin1:80"
           - url: "http://httpbin2:80"
           - url: "http://httpbin3:80"
+          - url: "http://httpbin4:80"
+          - url: "http://httpbin5:80"
         passHostHeader: true

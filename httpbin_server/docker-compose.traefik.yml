@@ -22,6 +22,14 @@ services:
       retries: 3
     networks:
       - httpbin_server
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1024M
+        reservations:
+          cpus: '1.0'
+          memory: 512M
 
   httpbin1:
     image: kennethreitz/httpbin
