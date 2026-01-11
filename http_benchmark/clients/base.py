@@ -22,6 +22,16 @@ class BaseHTTPAdapter(ABC):
         """Make an async HTTP request and return response data."""
         pass
 
+    @abstractmethod
+    def make_request_stream(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make a streaming HTTP request and return response data with stream info."""
+        pass
+
+    @abstractmethod
+    async def make_request_stream_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async streaming HTTP request and return response data with stream info."""
+        pass
+
     def __enter__(self):
         """Initialize session when entering sync context."""
         return self

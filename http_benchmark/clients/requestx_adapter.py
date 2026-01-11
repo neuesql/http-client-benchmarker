@@ -123,3 +123,111 @@ class RequestXAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
+
+    def make_request_stream(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make a streaming HTTP request using the requestx library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = request.timeout
+            verify_ssl = request.verify_ssl
+
+            data = request.body if request.body else None
+
+            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
+            if data is not None:
+                kwargs["data"] = data
+
+            start_time = time.time()
+            
+            # RequestX doesn't have native streaming like requests
+            # Fall back to regular request and simulate streaming behavior
+            response = self.session.request(method, url, **kwargs)
+            
+            # Simulate chunked reading
+            content = response.content
+            chunk_count = 1 if content else 0
+            
+            end_time = time.time()
+
+            response_time = end_time - start_time
+            if hasattr(response, "elapsed"):
+                response_time = response.elapsed.total_seconds()
+
+            return {
+                "status_code": response.status_code,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": response_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": chunk_count,
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }
+
+    async def make_request_stream_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async streaming HTTP request using the requestx library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = request.timeout
+            verify_ssl = request.verify_ssl
+
+            data = request.body if request.body else None
+
+            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
+            if data is not None:
+                kwargs["data"] = data
+
+            start_time = asyncio.get_event_loop().time()
+            
+            # RequestX doesn't have native streaming like requests
+            # Fall back to regular request and simulate streaming behavior
+            response = await self.async_session.request(method, url, **kwargs)
+            
+            # Simulate chunked reading
+            content = response.content
+            chunk_count = 1 if content else 0
+            
+            end_time = asyncio.get_event_loop().time()
+
+            response_time = end_time - start_time
+            if hasattr(response, "elapsed"):
+                response_time = response.elapsed.total_seconds()
+
+            return {
+                "status_code": response.status_code,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": response_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": chunk_count,
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }

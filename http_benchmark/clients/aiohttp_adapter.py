@@ -81,3 +81,58 @@ class AiohttpAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
+
+    def make_request_stream(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make a streaming HTTP request using the aiohttp library."""
+        raise NotImplementedError("aiohttp is async-only, use make_request_stream_async instead")
+
+    async def make_request_stream_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async streaming HTTP request using the aiohttp library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = aiohttp.ClientTimeout(total=request.timeout)
+            ssl = True if request.verify_ssl else False
+
+            data = request.body if request.body else None
+
+            start_time = asyncio.get_event_loop().time()
+
+            async with self.session.request(
+                method=method,
+                url=url,
+                headers=headers,
+                data=data,
+                timeout=timeout,
+                ssl=ssl,
+            ) as response:
+                content = b""
+                async for chunk in response.content.iter_chunked(8192):
+                    if chunk:
+                        content += chunk
+
+            end_time = asyncio.get_event_loop().time()
+
+            return {
+                "status_code": response.status,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": end_time - start_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": len(content) // 8192 + (1 if len(content) % 8192 > 0 else 0),
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }

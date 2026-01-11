@@ -103,3 +103,90 @@ class HttpxAdapter(BaseHTTPAdapter):
                 "success": False,
                 "error": str(e),
             }
+
+    def make_request_stream(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make a streaming HTTP request using the httpx library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = request.timeout
+
+            data = request.body if request.body else None
+
+            import time
+            start_time = time.time()
+
+            with self.client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
+                content = b""
+                for chunk in response.iter_bytes(chunk_size=8192):
+                    if chunk:
+                        content += chunk
+
+            end_time = time.time()
+
+            return {
+                "status_code": response.status_code,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": end_time - start_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": len(content) // 8192 + (1 if len(content) % 8192 > 0 else 0),
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }
+
+    async def make_request_stream_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async streaming HTTP request using the httpx library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = request.timeout
+
+            data = request.body if request.body else None
+
+            start_time = asyncio.get_event_loop().time()
+
+            async with self.async_client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
+                content = b""
+                async for chunk in response.aiter_bytes(chunk_size=8192):
+                    if chunk:
+                        content += chunk
+
+            end_time = asyncio.get_event_loop().time()
+
+            return {
+                "status_code": response.status_code,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": end_time - start_time,
+                "url": str(response.url),
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": len(content) // 8192 + (1 if len(content) % 8192 > 0 else 0),
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }

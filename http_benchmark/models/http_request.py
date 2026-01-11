@@ -16,6 +16,7 @@ class HTTPRequest(BaseModel):
         body: Optional[str] = None,
         timeout: int = 30,
         verify_ssl: bool = True,
+        stream: bool = False,
         id: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid4())
@@ -25,3 +26,4 @@ class HTTPRequest(BaseModel):
         self.body = body or ""
         self.timeout = timeout
         self.verify_ssl = verify_ssl
+        self.stream = stream

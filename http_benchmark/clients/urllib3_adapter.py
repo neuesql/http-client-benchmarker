@@ -71,3 +71,60 @@ class Urllib3Adapter(BaseHTTPAdapter):
     async def make_request_async(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an async HTTP request using the urllib3 library."""
         raise NotImplementedError("urllib3 is sync-only, use make_request instead")
+
+    def make_request_stream(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make a streaming HTTP request using the urllib3 library."""
+        try:
+            method = request.method.upper()
+            url = request.url
+            headers = request.headers
+            timeout = request.timeout
+            verify_ssl = request.verify_ssl
+
+            http = self.pool if verify_ssl else self.pool_no_verify
+
+            body = request.body if request.body else None
+
+            start_time = time.time()
+            
+            # urllib3 doesn't have native streaming, but we can simulate it
+            # by reading the response in chunks
+            response = http.request(method=method, url=url, headers=headers, body=body, timeout=timeout, preload_content=False)
+            
+            content = b""
+            chunk_count = 0
+            for chunk in response.stream(8192):
+                if chunk:
+                    content += chunk
+                    chunk_count += 1
+            
+            response.release_conn()
+
+            end_time = time.time()
+
+            return {
+                "status_code": response.status,
+                "headers": dict(response.headers),
+                "content": content.decode("utf-8") if content else "",
+                "response_time": end_time - start_time,
+                "url": url,
+                "success": True,
+                "error": None,
+                "streamed": True,
+                "chunk_count": chunk_count,
+            }
+        except Exception as e:
+            return {
+                "status_code": None,
+                "headers": {},
+                "content": "",
+                "response_time": 0,
+                "url": request.url,
+                "success": False,
+                "error": str(e),
+                "streamed": False,
+            }
+
+    async def make_request_stream_async(self, request: HTTPRequest) -> Dict[str, Any]:
+        """Make an async streaming HTTP request using the urllib3 library."""
+        raise NotImplementedError("urllib3 is sync-only, use make_request_stream instead")

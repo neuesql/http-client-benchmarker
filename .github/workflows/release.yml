@@ -42,14 +42,13 @@ jobs:
       run: |
         uv sync --all-extras --dev
 
-    - name: Set VERSION from pyproject.toml
+    - name: Set VERSION from project
       id: get-version
       run: |
-        # Read version using grep and awk (no additional dependencies needed)
-        VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'"' '{print $2}')
+        VERSION=$(uv version --short)
         
         if [[ -z "$VERSION" ]]; then
-          echo "❌ Failed to read version from pyproject.toml"
+          echo "❌ Failed to read version from uv"
           exit 1
         fi
         
