@@ -86,18 +86,18 @@ class Urllib3Adapter(BaseHTTPAdapter):
             body = request.body if request.body else None
 
             start_time = time.time()
-            
+
             # urllib3 doesn't have native streaming, but we can simulate it
             # by reading the response in chunks
             response = http.request(method=method, url=url, headers=headers, body=body, timeout=timeout, preload_content=False)
-            
+
             content = b""
             chunk_count = 0
             for chunk in response.stream(8192):
                 if chunk:
                     content += chunk
                     chunk_count += 1
-            
+
             response.release_conn()
 
             end_time = time.time()

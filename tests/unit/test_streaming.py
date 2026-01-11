@@ -29,7 +29,7 @@ class TestRequestsStreaming(unittest.TestCase):
     def test_requests_stream_request(self):
         """Test streaming request with requests adapter."""
         result = self.adapter.make_request_stream(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -59,7 +59,7 @@ class TestHttpxStreaming(unittest.TestCase):
     def test_httpx_stream_request(self):
         """Test streaming request with httpx adapter."""
         result = self.adapter.make_request_stream(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -88,7 +88,7 @@ class TestHttpxAsyncStreaming(unittest.IsolatedAsyncioTestCase):
     async def test_httpx_stream_async_request(self):
         """Test async streaming request with httpx adapter."""
         result = await self.adapter.make_request_stream_async(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -117,7 +117,7 @@ class TestAiohttpStreaming(unittest.IsolatedAsyncioTestCase):
     async def test_aiohttp_stream_async_request(self):
         """Test async streaming request with aiohttp adapter."""
         result = await self.adapter.make_request_stream_async(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -146,7 +146,7 @@ class TestUrllib3Streaming(unittest.TestCase):
     def test_urllib3_stream_request(self):
         """Test streaming request with urllib3 adapter."""
         result = self.adapter.make_request_stream(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -175,7 +175,7 @@ class TestPycurlStreaming(unittest.TestCase):
     def test_pycurl_stream_request(self):
         """Test streaming request with pycurl adapter."""
         result = self.adapter.make_request_stream(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -204,7 +204,7 @@ class TestRequestXStreaming(unittest.TestCase):
     def test_requestx_stream_request(self):
         """Test streaming request with requestx adapter."""
         result = self.adapter.make_request_stream(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])
@@ -233,7 +233,7 @@ class TestRequestXAsyncStreaming(unittest.IsolatedAsyncioTestCase):
     async def test_requestx_stream_async_request(self):
         """Test async streaming request with requestx adapter."""
         result = await self.adapter.make_request_stream_async(self.request)
-        
+
         self.assertTrue(result["success"])
         self.assertEqual(result["status_code"], 200)
         self.assertTrue(result["streamed"])

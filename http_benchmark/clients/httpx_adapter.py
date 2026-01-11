@@ -115,6 +115,7 @@ class HttpxAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
 
             import time
+
             start_time = time.time()
 
             with self.client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:

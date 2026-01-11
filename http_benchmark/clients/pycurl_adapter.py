@@ -114,12 +114,10 @@ class PycurlAdapter(BaseHTTPAdapter):
             timeout = request.timeout
             verify_ssl = request.verify_ssl
 
-            buffer = BytesIO()
-            
             # Create a callback function to collect chunks
             chunks = []
             chunk_count = 0
-            
+
             def write_callback(data):
                 chunks.append(data)
                 nonlocal chunk_count

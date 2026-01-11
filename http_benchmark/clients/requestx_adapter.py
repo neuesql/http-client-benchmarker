@@ -140,15 +140,15 @@ class RequestXAdapter(BaseHTTPAdapter):
                 kwargs["data"] = data
 
             start_time = time.time()
-            
+
             # RequestX doesn't have native streaming like requests
             # Fall back to regular request and simulate streaming behavior
             response = self.session.request(method, url, **kwargs)
-            
+
             # Simulate chunked reading
             content = response.content
             chunk_count = 1 if content else 0
-            
+
             end_time = time.time()
 
             response_time = end_time - start_time
@@ -194,15 +194,15 @@ class RequestXAdapter(BaseHTTPAdapter):
                 kwargs["data"] = data
 
             start_time = asyncio.get_event_loop().time()
-            
+
             # RequestX doesn't have native streaming like requests
             # Fall back to regular request and simulate streaming behavior
             response = await self.async_session.request(method, url, **kwargs)
-            
+
             # Simulate chunked reading
             content = response.content
             chunk_count = 1 if content else 0
-            
+
             end_time = asyncio.get_event_loop().time()
 
             response_time = end_time - start_time

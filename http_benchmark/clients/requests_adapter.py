@@ -92,7 +92,7 @@ class RequestsAdapter(BaseHTTPAdapter):
             content = b""
             for chunk in response.iter_content(chunk_size=8192, decode_unicode=True):
                 if chunk:
-                    content += chunk.encode('utf-8') if isinstance(chunk, str) else chunk
+                    content += chunk.encode("utf-8") if isinstance(chunk, str) else chunk
 
             return {
                 "status_code": response.status_code,
