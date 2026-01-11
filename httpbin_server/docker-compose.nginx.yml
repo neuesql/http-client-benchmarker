@@ -14,6 +14,8 @@ services:
       - httpbin1
       - httpbin2
       - httpbin3
+      - httpbin4
+      - httpbin5
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
       interval: 10s
@@ -55,6 +57,36 @@ services:
   httpbin3:
     image: kennethreitz/httpbin
     container_name: httpbin3
+    restart: unless-stopped
+    networks:
+      - httpbin_server
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  httpbin4:
+    image: kennethreitz/httpbin
+    container_name: httpbin4
+    restart: unless-stopped
+    networks:
+      - httpbin_server
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  httpbin5:
+    image: kennethreitz/httpbin
+    container_name: httpbin5
     restart: unless-stopped
     networks:
       - httpbin_server

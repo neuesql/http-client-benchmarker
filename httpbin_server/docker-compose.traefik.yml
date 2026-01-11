@@ -80,6 +80,44 @@ services:
           cpus: '0.5'
           memory: 256M
 
+  httpbin4:
+    image: kennethreitz/httpbin
+    container_name: httpbin4
+    restart: unless-stopped
+    networks:
+      - httpbin_server
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.httpbin-http.service=httpbin
+      - traefik.http.services.httpbin.loadbalancer.server.port=80
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  httpbin5:
+    image: kennethreitz/httpbin
+    container_name: httpbin5
+    restart: unless-stopped
+    networks:
+      - httpbin_server
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.httpbin-http.service=httpbin
+      - traefik.http.services.httpbin.loadbalancer.server.port=80
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
 networks:
   httpbin_server:
     name: httpbin_server
