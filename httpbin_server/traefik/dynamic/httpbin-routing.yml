@@ -1,12 +1,12 @@
 http:
   routers:
     httpbin-http:
-      rule: "Host(`localhost`)"
+      rule: " Host(`0.0.0.0`)"
       entryPoints:
         - http
       service: httpbin
     httpbin-https:
-      rule: "Host(`localhost`)"
+      rule: "Host(`0.0.0.0`)"
       entryPoints:
         - https
       service: httpbin
