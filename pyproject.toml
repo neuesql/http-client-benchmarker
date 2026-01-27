@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "http-client-benchmarker"
-version = "5.1.0"
+version = "5.1.1"
 description = "A Python HTTP Client Performance Benchmark Framework"
 readme = "README.md"
 authors = [{name = "Qunfei Wu", email = "wu.qunfei@gmail.com"}]
@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "requests>=2.31.0",
-    "requestx>=0.1.0",
+    "requestx>=1.0.3",
     "httpx>=0.27.0",
     "aiohttp>=3.9.0",
     "urllib3>=2.0.0",

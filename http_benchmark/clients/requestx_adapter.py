@@ -1,6 +1,5 @@
 """RequestX HTTP client adapter for the HTTP benchmark framework."""
 
-import time
 import asyncio
 from typing import Any, Dict
 
@@ -15,28 +14,29 @@ class RequestXAdapter(BaseHTTPAdapter):
 
     def __init__(self):
         super().__init__("requestx")
-        self.session = None
-        self.async_session = None
+        self.client = None
+        self.async_client = None
+        self.verify_ssl = True
 
     def __enter__(self):
-        """Initialize session when entering sync context."""
-        self.session = requestx.Session()
+        """Initialize sync client when entering sync context."""
+        self.client = requestx.Client(verify=self.verify_ssl)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Close session when exiting sync context."""
-        if self.session:
-            self.session.close()
+        """Close sync client when exiting sync context."""
+        if self.client:
+            self.client.close()
 
     async def __aenter__(self):
-        """Initialize session when entering async context."""
-        self.async_session = requestx.Session()
+        """Initialize async client when entering async context."""
+        self.async_client = requestx.AsyncClient(verify=self.verify_ssl)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Close session when exiting async context."""
-        if self.async_session:
-            self.async_session.close()
+        """Close async client when exiting async context."""
+        if self.async_client:
+            await self.async_client.aclose()
 
     def make_request(self, request: HTTPRequest) -> Dict[str, Any]:
         """Make an HTTP request using the requestx library."""
@@ -45,27 +45,16 @@ class RequestXAdapter(BaseHTTPAdapter):
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
             data = request.body if request.body else None
 
-            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
-            if data is not None:
-                kwargs["data"] = data
-
-            start_time = time.time()
-            response = self.session.request(method, url, **kwargs)
-            end_time = time.time()
-
-            response_time = end_time - start_time
-            if hasattr(response, "elapsed"):
-                response_time = response.elapsed.total_seconds()
+            response = self.client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
 
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "content": response.text,
-                "response_time": response_time,
+                "response_time": response.elapsed.total_seconds(),
                 "url": str(response.url),
                 "success": True,
                 "error": None,
@@ -88,27 +77,18 @@ class RequestXAdapter(BaseHTTPAdapter):
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
             data = request.body if request.body else None
 
-            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
-            if data is not None:
-                kwargs["data"] = data
-
             start_time = asyncio.get_event_loop().time()
-            response = await self.async_session.request(method, url, **kwargs)
+            response = await self.async_client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
             end_time = asyncio.get_event_loop().time()
-
-            response_time = end_time - start_time
-            if hasattr(response, "elapsed"):
-                response_time = response.elapsed.total_seconds()
 
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "content": response.text,
-                "response_time": response_time,
+                "response_time": end_time - start_time,
                 "url": str(response.url),
                 "success": True,
                 "error": None,
@@ -131,40 +111,31 @@ class RequestXAdapter(BaseHTTPAdapter):
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
             data = request.body if request.body else None
 
-            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
-            if data is not None:
-                kwargs["data"] = data
+            import time
 
             start_time = time.time()
 
-            # RequestX doesn't have native streaming like requests
-            # Fall back to regular request and simulate streaming behavior
-            response = self.session.request(method, url, **kwargs)
-
-            # Simulate chunked reading
-            content = response.content
-            chunk_count = 1 if content else 0
+            with self.client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
+                content = b""
+                for chunk in response.iter_bytes(chunk_size=8192):
+                    if chunk:
+                        content += chunk
 
             end_time = time.time()
-
-            response_time = end_time - start_time
-            if hasattr(response, "elapsed"):
-                response_time = response.elapsed.total_seconds()
 
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "content": content.decode("utf-8") if content else "",
-                "response_time": response_time,
+                "response_time": end_time - start_time,
                 "url": str(response.url),
                 "success": True,
                 "error": None,
                 "streamed": True,
-                "chunk_count": chunk_count,
+                "chunk_count": len(content) // 8192 + (1 if len(content) % 8192 > 0 else 0),
             }
         except Exception as e:
             return {
@@ -185,40 +156,29 @@ class RequestXAdapter(BaseHTTPAdapter):
             url = request.url
             headers = request.headers
             timeout = request.timeout
-            verify_ssl = request.verify_ssl
 
             data = request.body if request.body else None
 
-            kwargs = {"headers": headers, "timeout": timeout, "verify": verify_ssl}
-            if data is not None:
-                kwargs["data"] = data
-
             start_time = asyncio.get_event_loop().time()
 
-            # RequestX doesn't have native streaming like requests
-            # Fall back to regular request and simulate streaming behavior
-            response = await self.async_session.request(method, url, **kwargs)
-
-            # Simulate chunked reading
-            content = response.content
-            chunk_count = 1 if content else 0
+            async with self.async_client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
+                content = b""
+                async for chunk in response.aiter_bytes(chunk_size=8192):
+                    if chunk:
+                        content += chunk
 
             end_time = asyncio.get_event_loop().time()
-
-            response_time = end_time - start_time
-            if hasattr(response, "elapsed"):
-                response_time = response.elapsed.total_seconds()
 
             return {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "content": content.decode("utf-8") if content else "",
-                "response_time": response_time,
+                "response_time": end_time - start_time,
                 "url": str(response.url),
                 "success": True,
                 "error": None,
                 "streamed": True,
-                "chunk_count": chunk_count,
+                "chunk_count": len(content) // 8192 + (1 if len(content) % 8192 > 0 else 0),
             }
         except Exception as e:
             return {
