@@ -1,7 +1,4 @@
-"""RequestX HTTP client adapter for the HTTP benchmark framework.
-
-Updated for requestx 1.0.2 which has an API similar to httpx.
-"""
+"""RequestX HTTP client adapter for the HTTP benchmark framework."""
 
 import asyncio
 from typing import Any, Dict
@@ -13,11 +10,7 @@ from .base import BaseHTTPAdapter
 
 
 class RequestXAdapter(BaseHTTPAdapter):
-    """HTTP adapter for the requestx library (v1.0.2+).
-
-    RequestX 1.0.2 uses an httpx-like API with Client for sync
-    and AsyncClient for async operations.
-    """
+    """HTTP adapter for the requestx library."""
 
     def __init__(self):
         super().__init__("requestx")
@@ -55,13 +48,7 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            response = self.client.request(
-                method=method,
-                url=url,
-                headers=headers,
-                content=data,
-                timeout=timeout
-            )
+            response = self.client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
 
             return {
                 "status_code": response.status_code,
@@ -94,13 +81,7 @@ class RequestXAdapter(BaseHTTPAdapter):
             data = request.body if request.body else None
 
             start_time = asyncio.get_event_loop().time()
-            response = await self.async_client.request(
-                method=method,
-                url=url,
-                headers=headers,
-                content=data,
-                timeout=timeout
-            )
+            response = await self.async_client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
             end_time = asyncio.get_event_loop().time()
 
             return {
@@ -137,13 +118,7 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             start_time = time.time()
 
-            with self.client.stream(
-                method=method,
-                url=url,
-                headers=headers,
-                content=data,
-                timeout=timeout
-            ) as response:
+            with self.client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
                 content = b""
                 for chunk in response.iter_bytes(chunk_size=8192):
                     if chunk:
@@ -186,13 +161,7 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             start_time = asyncio.get_event_loop().time()
 
-            async with self.async_client.stream(
-                method=method,
-                url=url,
-                headers=headers,
-                content=data,
-                timeout=timeout
-            ) as response:
+            async with self.async_client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
                 content = b""
                 async for chunk in response.aiter_bytes(chunk_size=8192):
                     if chunk:
