@@ -54,7 +54,7 @@ class RequestXAdapter(BaseHTTPAdapter):
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "content": response.text,
-                "response_time": response.elapsed.total_seconds(),
+                "response_time": response.elapsed,
                 "url": str(response.url),
                 "success": True,
                 "error": None,
