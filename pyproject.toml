@@ -9,7 +9,7 @@ description = "A Python HTTP Client Performance Benchmark Framework"
 readme = "README.md"
 authors = [{name = "Qunfei Wu", email = "wu.qunfei@gmail.com"}]
 license = {text = "MIT"}
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
