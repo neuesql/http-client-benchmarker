@@ -55,20 +55,24 @@ class BenchmarkRunner:
             verify_ssl=self.config.verify_ssl,
         )
 
-        initial_metrics = resource_monitor.get_all_metrics()
+        # Start continuous monitoring
+        resource_monitor.start_monitoring()
 
         if self.config.is_async:
             result = asyncio.run(self._run_async_benchmark(adapter_class, http_request))
         else:
             result = self._run_sync_benchmark(adapter_class, http_request)
 
-        final_metrics = resource_monitor.get_all_metrics()
+        # Stop monitoring and get aggregated metrics
+        metrics = resource_monitor.stop_monitoring()
+        network_io = resource_monitor.get_network_io_delta()
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
 
-        cpu_usage_avg = (initial_metrics["cpu_percent"] + final_metrics["cpu_percent"]) / 2
-        memory_usage_avg = (initial_metrics["memory_info"]["percent"] + final_metrics["memory_info"]["percent"]) / 2
+        # Use aggregated metrics instead of 2-point average
+        cpu_usage_avg = metrics["cpu_avg"]
+        memory_usage_avg = metrics["memory_avg"]
 
         benchmark_result = BenchmarkResult(
             name=self.config.name,
@@ -88,7 +92,7 @@ class BenchmarkRunner:
             p99_response_time=result["p99_response_time"],
             cpu_usage_avg=cpu_usage_avg,
             memory_usage_avg=memory_usage_avg,
-            network_io=final_metrics["network_io"],
+            network_io=network_io,  # Now contains delta, not cumulative
             error_count=result["error_count"],
             error_rate=result["error_rate"],
             concurrency_level=self.config.concurrency,
