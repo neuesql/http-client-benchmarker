@@ -13,7 +13,7 @@ class ResourceMonitor:
     def __init__(self):
         self.process = psutil.Process()
         self._lock = threading.Lock()
-        self._monitoring = False
+        self._stop_event = threading.Event()
         self._samples: List[Dict[str, Any]] = []
         self._monitor_thread: Optional[threading.Thread] = None
         self._initial_net_io: Optional[Any] = None
@@ -25,25 +25,28 @@ class ResourceMonitor:
         self._initial_net_io = psutil.net_io_counters()
         with self._lock:
             self._samples = []
-        self._monitoring = True
+        self._stop_event.clear()
         self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self._monitor_thread.start()
 
     def _monitor_loop(self) -> None:
         """Sample metrics every 200ms."""
-        while self._monitoring:
+        while not self._stop_event.is_set():
+            memory_info = self.process.memory_info()
             sample = {
                 "cpu_percent": self.process.cpu_percent(),
                 "memory_percent": self.process.memory_percent(),
+                "memory_rss_mb": memory_info.rss / 1024 / 1024,
                 "timestamp": time.time()
             }
             with self._lock:
                 self._samples.append(sample)
-            time.sleep(0.2)
+            # Use wait with timeout instead of sleep for faster shutdown
+            self._stop_event.wait(timeout=0.2)
 
     def stop_monitoring(self) -> Dict[str, Any]:
         """Stop monitoring and return aggregated metrics."""
-        self._monitoring = False
+        self._stop_event.set()
         if self._monitor_thread:
             self._monitor_thread.join(timeout=1.0)
             self._monitor_thread = None
@@ -53,14 +56,19 @@ class ResourceMonitor:
         """Calculate averages from collected samples."""
         with self._lock:
             if not self._samples:
-                return {"cpu_avg": 0.0, "memory_avg": 0.0, "cpu_max": 0.0, "memory_max": 0.0, "sample_count": 0}
+                return {"cpu_avg": 0.0, "memory_avg": 0.0, "memory_percent_avg": 0.0, "memory_mb_avg": 0.0, "cpu_max": 0.0, "memory_max": 0.0, "memory_mb_max": 0.0, "sample_count": 0}
             cpu_values = [s["cpu_percent"] for s in self._samples]
-            mem_values = [s["memory_percent"] for s in self._samples]
+            mem_percent_values = [s["memory_percent"] for s in self._samples]
+            mem_mb_values = [s["memory_rss_mb"] for s in self._samples]
             return {
                 "cpu_avg": sum(cpu_values) / len(cpu_values),
-                "memory_avg": sum(mem_values) / len(mem_values),
+                "memory_avg": sum(mem_percent_values) / len(mem_percent_values),  # Kept for backward compatibility
+                "memory_percent_avg": sum(mem_percent_values) / len(mem_percent_values),  # Explicit name
+                "memory_mb_avg": sum(mem_mb_values) / len(mem_mb_values),  # New MB value
                 "cpu_max": max(cpu_values),
-                "memory_max": max(mem_values),
+                "memory_max": max(mem_percent_values),  # Kept for backward compatibility
+                "memory_percent_max": max(mem_percent_values),  # Explicit name
+                "memory_mb_max": max(mem_mb_values),  # New MB value
                 "sample_count": len(self._samples)
             }
 

@@ -1,6 +1,6 @@
 """RequestX HTTP client adapter for the HTTP benchmark framework."""
 
-import asyncio
+import time
 from typing import Any, Dict
 
 import requestx
@@ -80,9 +80,9 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            start_time = asyncio.get_event_loop().time()
+            start_time = time.perf_counter()
             response = await self.async_client.request(method=method, url=url, headers=headers, content=data, timeout=timeout)
-            end_time = asyncio.get_event_loop().time()
+            end_time = time.perf_counter()
 
             return {
                 "status_code": response.status_code,
@@ -114,9 +114,7 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            import time
-
-            start_time = time.time()
+            start_time = time.perf_counter()
 
             with self.client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
                 content = b""
@@ -124,7 +122,7 @@ class RequestXAdapter(BaseHTTPAdapter):
                     if chunk:
                         content += chunk
 
-            end_time = time.time()
+            end_time = time.perf_counter()
 
             return {
                 "status_code": response.status_code,
@@ -159,7 +157,7 @@ class RequestXAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            start_time = asyncio.get_event_loop().time()
+            start_time = time.perf_counter()
 
             async with self.async_client.stream(method=method, url=url, headers=headers, content=data, timeout=timeout) as response:
                 content = b""
@@ -167,7 +165,7 @@ class RequestXAdapter(BaseHTTPAdapter):
                     if chunk:
                         content += chunk
 
-            end_time = asyncio.get_event_loop().time()
+            end_time = time.perf_counter()
 
             return {
                 "status_code": response.status_code,

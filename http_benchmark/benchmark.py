@@ -40,6 +40,7 @@ class BenchmarkRunner:
         app_logger.info(f"Starting benchmark for {self.config.target_url} using {self.config.client_library}")
 
         start_time = datetime.now()
+        perf_start = time.perf_counter()
 
         if self.config.client_library not in self.adapter_classes:
             raise ValueError(f"Unsupported client library: {self.config.client_library}")
@@ -68,7 +69,8 @@ class BenchmarkRunner:
         network_io = resource_monitor.get_network_io_delta()
 
         end_time = datetime.now()
-        duration = (end_time - start_time).total_seconds()
+        perf_end = time.perf_counter()
+        duration = perf_end - perf_start
 
         # Use aggregated metrics instead of 2-point average
         cpu_usage_avg = metrics["cpu_avg"]
@@ -115,7 +117,7 @@ class BenchmarkRunner:
 
         response_times = []
         error_count = 0
-        start_time = time.time()
+        start_time = time.perf_counter()
         end_time = start_time + self.config.duration_seconds
 
         # Execute requests concurrently using ThreadPoolExecutor for the specified duration
@@ -126,7 +128,7 @@ class BenchmarkRunner:
                 futures.add(executor.submit(adapter.make_request, http_request))
 
             # Continue making requests for the specified duration
-            while time.time() < end_time:
+            while time.perf_counter() < end_time:
                 completed_futures = []
                 try:
                     for future in as_completed(futures, timeout=1):  # Use timeout to check duration periodically
@@ -139,7 +141,7 @@ class BenchmarkRunner:
                                 app_logger.error(f"Request failed: {result.get('error', 'Unknown error')}")
 
                         # Submit a new request to keep the concurrency level
-                        if time.time() < end_time:
+                        if time.perf_counter() < end_time:
                             futures.add(executor.submit(adapter.make_request, http_request))
 
                         completed_futures.append(future)
@@ -156,7 +158,7 @@ class BenchmarkRunner:
                     futures.discard(future)
 
                 # If all futures completed before duration, submit more
-                while len(futures) < self.config.concurrency and time.time() < end_time:
+                while len(futures) < self.config.concurrency and time.perf_counter() < end_time:
                     futures.add(executor.submit(adapter.make_request, http_request))
 
         # Wait for any remaining requests to complete
@@ -205,7 +207,7 @@ class BenchmarkRunner:
             p99_response_time = 0
 
         total_completed_requests = len(response_times) + error_count
-        actual_duration = time.time() - start_time
+        actual_duration = time.perf_counter() - start_time
         requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
         error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
 
@@ -234,7 +236,7 @@ class BenchmarkRunner:
 
         response_times = []
         error_count = 0
-        start_time = asyncio.get_event_loop().time()
+        start_time = time.perf_counter()
         end_time = start_time + self.config.duration_seconds
 
         # Create initial tasks for concurrent execution
@@ -244,7 +246,7 @@ class BenchmarkRunner:
             tasks.add(asyncio.create_task(task))
 
         # Continue making requests for the specified duration
-        while asyncio.get_event_loop().time() < end_time:
+        while time.perf_counter() < end_time:
             if not tasks:
                 break
 
@@ -267,7 +269,7 @@ class BenchmarkRunner:
             tasks = pending
 
             # If all tasks completed before duration, submit more
-            while len(tasks) < self.config.concurrency and asyncio.get_event_loop().time() < end_time:
+            while len(tasks) < self.config.concurrency and time.perf_counter() < end_time:
                 new_task = adapter.make_request_async(http_request)
                 tasks.add(asyncio.create_task(new_task))
 
@@ -321,7 +323,7 @@ class BenchmarkRunner:
             p99_response_time = 0
 
         total_completed_requests = len(response_times) + error_count
-        actual_duration = asyncio.get_event_loop().time() - start_time
+        actual_duration = time.perf_counter() - start_time
         requests_per_second = total_completed_requests / actual_duration if actual_duration > 0 else 0
         error_rate = (error_count / total_completed_requests) * 100 if total_completed_requests > 0 else 0
         return {

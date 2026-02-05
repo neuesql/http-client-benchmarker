@@ -2,6 +2,7 @@
 
 import aiohttp
 import asyncio
+import time
 from typing import Dict, Any
 from .base import BaseHTTPAdapter
 from ..models.http_request import HTTPRequest
@@ -48,7 +49,7 @@ class AiohttpAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            start_time = asyncio.get_event_loop().time()
+            start_time = time.perf_counter()
 
             async with self.session.request(
                 method=method,
@@ -60,7 +61,7 @@ class AiohttpAdapter(BaseHTTPAdapter):
             ) as response:
                 content = await response.text()
 
-            end_time = asyncio.get_event_loop().time()
+            end_time = time.perf_counter()
 
             return {
                 "status_code": response.status,
@@ -97,7 +98,7 @@ class AiohttpAdapter(BaseHTTPAdapter):
 
             data = request.body if request.body else None
 
-            start_time = asyncio.get_event_loop().time()
+            start_time = time.perf_counter()
 
             async with self.session.request(
                 method=method,
@@ -112,7 +113,7 @@ class AiohttpAdapter(BaseHTTPAdapter):
                     if chunk:
                         content += chunk
 
-            end_time = asyncio.get_event_loop().time()
+            end_time = time.perf_counter()
 
             return {
                 "status_code": response.status,
